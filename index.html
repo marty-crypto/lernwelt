@@ -201,6 +201,13 @@ img.dia { width: 18px; height: auto; vertical-align: -2px; image-rendering: pixe
 .txt { font: inherit; font-size: 22px; padding: 10px 12px; background: #0d0f1c; color: var(--ink); border: 4px solid #000; box-shadow: inset 0 0 0 2px #444; width: 100%; min-width: 0; flex: 1 1 140px; }
 .log { background: #0d0f1c; border: 4px solid #000; padding: 10px 12px; font-size: 19px; display: flex; flex-direction: column; gap: 4px; }
 .log b { color: #7af0e6; font-weight: 400; } .log b.neg { color: #ff8a7f; }
+.guide section { background: var(--night-2); border: 4px solid #000; box-shadow: 4px 4px 0 #000; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.guide h3 { font-size: 11px; color: var(--gold); }
+.guide p { font-size: 21px; line-height: 1.2; }
+.guide b { color: #fff; font-weight: 400; text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 3px; }
+.guide table { width: 100%; border-collapse: collapse; font-size: 20px; }
+.guide td { padding: 6px 4px; border-bottom: 2px solid #000; vertical-align: top; }
+.guide td:last-child { text-align: right; white-space: nowrap; color: #7af0e6; padding-left: 10px; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 
@@ -526,14 +533,75 @@ function home() {
       </div>
       <h2>Inventar</h2>
       <div class="inv">${BADGES.map(b => `<div class="slot" title="${b.name}">${S.badges[b.id] ? `<i style="background-image:url(${TEX[b.tex]})" aria-label="${b.name}"></i>` : ""}</div>`).join("")}</div>
-      <p class="dim mini">Diamanten gibt's für jeden neuen Stern (+3 extra bei 3 Sternen), den ersten Boss-Sieg (+10), alle 5 Tage Serie (+5) und gute Noten im echten Test. Neue Designs schaltest du mit höheren Leveln frei – kommen bald.</p>
+      <button class="btn" id="guide">So funktioniert's · XP, Diamanten, Shop</button>
       <button class="btn small" id="papa" style="align-self:flex-start">Papa-Bereich</button>
     </div>
     <button class="btn small sound" id="snd">${S.sound ? "Ton an" : "Ton aus"}</button>`;
   app.querySelectorAll("[data-w]").forEach(b => b.onclick = () => { sfx("tap"); openWorld(b.dataset.w); });
-  $("#shop").onclick = shop; $("#pc").onclick = pcScreen; $("#pc2").onclick = pcScreen;
+  $("#shop").onclick = shop; $("#pc").onclick = pcScreen; $("#pc2").onclick = pcScreen; $("#guide").onclick = guide;
+  if (!S.guideSeen) { S.guideSeen = 1; save(); return guide(); }
   $("#papa").onclick = () => pinGate("Papa-Bereich", papa, home);
   $("#snd").onclick = () => { S.sound = !S.sound; save(); home(); };
+  scrollTo(0, 0);
+}
+
+/* ===================== ANLEITUNG ===================== */
+function guide() {
+  const shopRows = SHOP.map(it => `<tr><td>${it.name}</td><td>${it.price} ${DIA_IMG}</td></tr>`).join("");
+  app.innerHTML = `
+    <div class="topbar"><button class="btn small" id="back">Zurück</button><h2>So funktioniert's</h2></div>
+    <div class="stack guide">
+      <div class="sign"><span class="disp">Kurz gesagt</span>Lernen → XP und Level. Neues schaffen → Diamanten. Diamanten → Shop oder Gaming-PC.</div>
+
+      <section><h3>1 · XP und Level</h3>
+        <p>XP zeigen, wie weit du bist. Sie gehen <b>nie</b> verloren – du kannst sie nicht ausgeben.</p>
+        <table>
+          <tr><td>Video bis zum Ende geschaut</td><td>+20 XP</td></tr>
+          <tr><td>Antwort beim ersten Versuch richtig</td><td>+10 XP</td></tr>
+          <tr><td>Welt ohne Fehler (3 Sterne)</td><td>+50 XP</td></tr>
+          <tr><td>Lückentext komplett richtig</td><td>+100 XP</td></tr>
+        </table>
+        <p>Alle 200 XP steigst du ein Level auf. Dein Titel wächst mit: ${TITLES.map(t => `<b>${t[1]}</b> (Lv ${t[0]})`).join(" → ")}.</p>
+        <p class="dim">Bald: Mit höheren Leveln schaltest du neue Designs für die App frei.</p>
+      </section>
+
+      <section><h3>2 · Sterne</h3>
+        <p>Jede Welt hat 3 Sterne. <b>3 Sterne</b> = kein einziger Fehler. 2 Sterne = höchstens 2 Fehler. Herzen weg = nochmal probieren.</p>
+        <p>Was du falsch hattest, landet in der <b>Fehler-Truhe</b>. Spiel sie, bis sie leer ist – dann sitzt es.</p>
+      </section>
+
+      <section><h3>3 · Diamanten ${DIA_IMG}</h3>
+        <p>Diamanten gibt es nur für <b>Neues</b>. Dieselbe Welt zehnmal spielen bringt XP, aber keine Diamanten mehr.</p>
+        <table>
+          <tr><td>Jeder neue Stern in einer Welt</td><td>+1 ${DIA_IMG}</td></tr>
+          <tr><td>Welt zum ersten Mal auf 3 Sterne</td><td>+3 extra</td></tr>
+          <tr><td>Boss zum ersten Mal besiegt</td><td>+10 ${DIA_IMG}</td></tr>
+          <tr><td>Alle 5 Tage am Stück gelernt</td><td>+5 ${DIA_IMG}</td></tr>
+          <tr><td><b>Note 1 im echten Test</b></td><td><b>+20 ${DIA_IMG}</b></td></tr>
+          <tr><td>Note 2 im echten Test</td><td>+12 ${DIA_IMG}</td></tr>
+          <tr><td>Note 3 im echten Test</td><td>+5 ${DIA_IMG}</td></tr>
+        </table>
+        <p>Die Noten trägt Papa ein, wenn du ihm den Test zeigst. Die echte Note bringt am meisten – darum geht's ja.</p>
+      </section>
+
+      <section><h3>4 · Shop</h3>
+        <table>${shopRows}</table>
+        <p>Zum Einlösen tippst du auf die Belohnung und gibst Papa das Handy – <b>er bestätigt mit seinem PIN</b>. Danach bekommst du einen Gutschein.</p>
+      </section>
+
+      <section><h3>5 · Gaming-PC-Topf</h3>
+        <p>Du kannst Diamanten in den PC-Topf einzahlen: <b>10 ${DIA_IMG} = 1 €</b>. Papa legt das Geld für dich zur Seite, bis der PC drin ist.</p>
+        <p>Pro Monat gehen höchstens <b>${MONTH_BUDGET} €</b> echtes Geld raus – PC-Topf, Döner und Kino zusammen. Ist die Grenze voll, behältst du deine Diamanten einfach bis zum nächsten Monat.</p>
+        <p>Geburtstags- oder Weihnachtsgeld kann Papa direkt in den Topf legen – dann springt der Balken nach vorne.</p>
+      </section>
+
+      <section><h3>Deine Entscheidung</h3>
+        <p>Jetzt einen Döner – oder sparen und schneller beim PC sein? Beides ist okay. Du entscheidest.</p>
+      </section>
+
+      <button class="btn go" id="go">Alles klar – los geht's</button>
+    </div>`;
+  $("#back").onclick = home; $("#go").onclick = home;
   scrollTo(0, 0);
 }
 
