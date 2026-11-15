@@ -1,0 +1,662 @@
+<title>Clemens' Lernwelt</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Lernwelt">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap">
+<style>
+/* Layout: eine schmale Spalte wie ein Handy-Spielmenü – Erdband oben, Welten als Block-Kacheln, Spiel-Screens darunter. Bewusst nur ein (Nacht-)Look. */
+:root {
+  --night: #141a2b;      /* Himmel */
+  --night-2: #1d2540;    /* Panels */
+  --stone: #6f7480;      /* Knöpfe */
+  --stone-hi: #9aa0ab;
+  --stone-lo: #3d414a;
+  --ink: #f4f1e6;        /* Text */
+  --ink-dim: #aab0c4;
+  --xp: #7be04a;         /* XP-Grün */
+  --gold: #ffcc33;
+  --red: #e5483b;
+  --ok: #3fbf5f;
+  --display: "Press Start 2P", "Courier New", monospace;
+  --body: "VT323", "Courier New", monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: var(--night);
+  background-image:
+    radial-gradient(2px 2px at 12% 18%, #ffffff55 50%, transparent 51%),
+    radial-gradient(2px 2px at 78% 9%, #ffffff44 50%, transparent 51%),
+    radial-gradient(2px 2px at 45% 32%, #ffffff33 50%, transparent 51%),
+    radial-gradient(2px 2px at 90% 46%, #ffffff33 50%, transparent 51%),
+    radial-gradient(2px 2px at 22% 64%, #ffffff22 50%, transparent 51%);
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 22px;
+  line-height: 1.15;
+  -webkit-tap-highlight-color: transparent;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: #4a8f2c; }
+.wrap {
+  max-width: 560px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 40px;
+}
+img.px, canvas.px { image-rendering: pixelated; image-rendering: crisp-edges; }
+
+/* Erd-/Grasband oben */
+.ground {
+  height: 34px; margin-left: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); margin-right: calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+  background-image: var(--tex-ground); background-size: 34px 34px; image-rendering: pixelated;
+  border-bottom: 4px solid #2a1a10;
+}
+h1, h2, h3, .disp { font-family: var(--display); font-weight: 400; letter-spacing: .02em; text-wrap: balance; margin: 0; }
+h1 { font-size: 20px; line-height: 1.4; text-shadow: 3px 3px 0 #000; }
+h2 { font-size: 14px; line-height: 1.5; text-shadow: 2px 2px 0 #000; }
+h3 { font-size: 11px; line-height: 1.5; }
+p { margin: 0; }
+.dim { color: var(--ink-dim); }
+.stack { display: flex; flex-direction: column; gap: 14px; }
+
+/* Spieler-Leiste */
+.hud { display: grid; grid-template-columns: auto 1fr; gap: 10px 14px; align-items: center; padding: 16px 0 6px; }
+.avatar { width: 56px; height: 56px; border: 4px solid #000; background-image: var(--tex-avatar); background-size: cover; image-rendering: pixelated; }
+.hud-txt { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.xpbar { height: 16px; background: #000; border: 3px solid #000; position: relative; box-shadow: 0 0 0 2px #444 inset; }
+.xpbar > i { position: absolute; inset: 0 auto 0 0; background: repeating-linear-gradient(90deg, var(--xp) 0 18px, #5cb732 18px 20px); transition: width .5s steps(10); }
+.xpbar > b { position: absolute; inset: -4px 0 0; text-align: center; font-family: var(--display); font-size: 9px; color: #c9ff8a; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000; }
+.stats { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 20px; }
+.stats span b { color: var(--gold); font-weight: 400; }
+
+/* Hinweis-Schild */
+.sign {
+  background-image: var(--tex-plank); background-size: 48px 48px; image-rendering: pixelated;
+  border: 4px solid #3b2410; padding: 12px 14px; color: #fff6e0; text-shadow: 2px 2px 0 #3b2410;
+  box-shadow: 4px 4px 0 #000;
+}
+.sign .disp { font-size: 10px; display: block; margin-bottom: 6px; color: var(--gold); }
+
+/* Welten-Kacheln */
+.worlds { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.world {
+  appearance: none; border: 4px solid #000; padding: 0; cursor: pointer; text-align: left; color: var(--ink);
+  background: var(--night-2); display: flex; flex-direction: column; min-width: 0; font: inherit;
+  box-shadow: 4px 4px 0 #000; transition: transform .08s;
+}
+.world:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #000; }
+.world:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.world .tex { height: 64px; background-size: 32px 32px; image-rendering: pixelated; position: relative; border-bottom: 4px solid #000; }
+.world .tex .stars { position: absolute; right: 6px; bottom: 6px; display: flex; gap: 2px; }
+.world .tex .stars i { width: 16px; height: 16px; background-image: var(--px-star-off); background-size: cover; image-rendering: pixelated; }
+.world .tex .stars i.on { background-image: var(--px-star); }
+.world .lbl { padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.world .lbl h3 { font-size: 9px; }
+.world .lbl span { font-size: 18px; color: var(--ink-dim); line-height: 1; }
+.world.wide { grid-column: 1 / -1; flex-direction: row; }
+.world.wide .tex { width: 96px; height: auto; min-height: 76px; border-bottom: 0; border-right: 4px solid #000; flex: none; }
+.world.locked { filter: grayscale(.9) brightness(.6); }
+.tag { font-family: var(--display); font-size: 8px; background: var(--red); color: #fff; padding: 3px 5px; align-self: flex-start; }
+.tag.y { background: var(--gold); color: #000; }
+
+/* Inventar */
+.inv { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; background: #8b8b8b; padding: 6px; border: 4px solid #000; box-shadow: inset 3px 3px 0 #bdbdbd, inset -3px -3px 0 #555; }
+.slot { aspect-ratio: 1; max-width: 100%; background: #6b6b6b; box-shadow: inset 3px 3px 0 #444, inset -3px -3px 0 #a5a5a5; display: grid; place-items: center; }
+.slot i { width: 72%; aspect-ratio: 1; background-size: cover; image-rendering: pixelated; border: 2px solid #000; }
+
+/* Stein-Knöpfe */
+.btn {
+  appearance: none; font: inherit; font-family: var(--display); font-size: 11px; line-height: 1.4; color: #fff; text-shadow: 2px 2px 0 #333;
+  background: var(--stone); border: 4px solid #000; padding: 14px 12px; cursor: pointer; width: 100%;
+  box-shadow: inset 4px 4px 0 var(--stone-hi), inset -4px -4px 0 var(--stone-lo);
+}
+.btn:active { box-shadow: inset 4px 4px 0 var(--stone-lo), inset -4px -4px 0 var(--stone-hi); }
+.btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.btn.go { background: #3a8f3a; box-shadow: inset 4px 4px 0 #6cc56c, inset -4px -4px 0 #1f5a1f; }
+.btn.small { width: auto; font-size: 9px; padding: 10px 12px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; }
+.row > .btn { flex: 1 1 140px; }
+
+/* Spiel-Screen */
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 0 10px; }
+.hearts { display: flex; gap: 3px; }
+.hearts i { width: 22px; height: 20px; background-image: var(--px-heart); background-size: cover; image-rendering: pixelated; }
+.hearts i.off { background-image: var(--px-heart-off); }
+.prog { height: 12px; background: #000; border: 3px solid #000; margin-bottom: 16px; }
+.prog > i { display: block; height: 100%; background: var(--gold); transition: width .3s; }
+.qcard { background: var(--night-2); border: 4px solid #000; box-shadow: 4px 4px 0 #000; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.qcard .kind { font-family: var(--display); font-size: 8px; color: var(--gold); letter-spacing: .08em; }
+.qtext { font-size: 27px; line-height: 1.1; }
+.opts { display: flex; flex-direction: column; gap: 10px; }
+.opt {
+  appearance: none; font: inherit; font-size: 23px; line-height: 1.05; text-align: left; color: #fff; cursor: pointer;
+  background: var(--stone); border: 4px solid #000; padding: 12px 14px;
+  box-shadow: inset 4px 4px 0 var(--stone-hi), inset -4px -4px 0 var(--stone-lo); text-shadow: 1px 1px 0 #333;
+}
+.opt:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.opt.ok { background: var(--ok); box-shadow: inset 4px 4px 0 #7de394, inset -4px -4px 0 #237a3a; }
+.opt.bad { background: var(--red); box-shadow: inset 4px 4px 0 #ff8a7f, inset -4px -4px 0 #8a2219; }
+.opt[disabled] { cursor: default; }
+.opt[disabled]:not(.ok):not(.bad) { opacity: .5; }
+.fb { border: 4px solid #000; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.fb.ok { background: #1f5a2c; }
+.fb.bad { background: #6a1d17; }
+.fb .disp { font-size: 11px; }
+.fb .why { font-size: 21px; color: #f2eee0; }
+
+/* Lückentext wie im Test */
+.lt { font-size: 24px; line-height: 1.75; background: #f3ecd8; color: #222; border: 4px solid #000; padding: 14px; box-shadow: 4px 4px 0 #000; }
+.gap {
+  appearance: none; font: inherit; font-size: 21px; line-height: 1; display: inline-block; min-width: 72px; padding: 3px 6px; margin: 0 2px;
+  border: 0; border-bottom: 3px solid #333; background: #e1d7bb; color: #1b3a8a; cursor: pointer; vertical-align: baseline;
+}
+.gap .n { font-family: var(--display); font-size: 7px; color: #6b5e3c; margin-right: 4px; vertical-align: super; }
+.gap.sel { background: var(--gold); outline: 3px solid #000; }
+.gap.ok { background: #a7e8b3; border-color: #1f7a33; }
+.gap.bad { background: #ffb1a9; border-color: #a12a1f; }
+.gap .fix { color: #1f7a33; font-size: 18px; margin-left: 4px; }
+.bank { position: sticky; bottom: 0; background: var(--night); padding: 10px 0 calc(10px + env(safe-area-inset-bottom, 0px)); display: flex; flex-wrap: wrap; gap: 6px; border-top: 4px solid #000; }
+.chip { appearance: none; font: inherit; font-size: 20px; padding: 6px 9px; background: #e9d8a6; color: #2a1d08; border: 3px solid #000; box-shadow: inset -3px -3px 0 #b49b5e; cursor: pointer; }
+.chip.used { opacity: .3; text-decoration: line-through; }
+.chip:focus-visible { outline: 3px solid var(--gold); }
+
+/* Ergebnis */
+.result { text-align: center; align-items: center; padding-top: 26px; }
+.bigstars { display: flex; gap: 8px; justify-content: center; }
+.bigstars i { width: 52px; height: 52px; background-image: var(--px-star-off); background-size: cover; image-rendering: pixelated; }
+.bigstars i.on { background-image: var(--px-star); animation: pop .4s steps(4) both; }
+.bigstars i.on:nth-child(2) { animation-delay: .25s; } .bigstars i.on:nth-child(3) { animation-delay: .5s; }
+@keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+.xpgain { font-family: var(--display); font-size: 16px; color: var(--xp); text-shadow: 2px 2px 0 #000; }
+
+.vid { width: 100%; max-width: 100%; max-height: 70vh; aspect-ratio: 9 / 16; background: #000; border: 4px solid #000; box-shadow: 4px 4px 0 #000; display: block; margin: 0 auto; object-fit: contain; }
+.btn[disabled] { opacity: .55; cursor: default; }
+.toast { position: fixed; left: 50%; top: calc(16px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); z-index: 20; font-family: var(--display); font-size: 11px; background: #000; color: var(--gold); border: 3px solid var(--gold); padding: 12px 14px; max-width: calc(100% - 32px); text-align: center; line-height: 1.5; }
+.mini { font-size: 18px; }
+.sound { position: fixed; right: max(12px, env(safe-area-inset-right, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 5; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="wrap" id="app"></div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+/* ===================== INHALT ===================== */
+/* Stoff: Lückentext Frühe Neuzeit, Quiz Reformation, Hefteintrag Renaissance, Buch S. 15/16 (markiert), Arbeitsblatt Kirchenspaltung */
+
+const LT_BANK = ["Christoph Kolumbus","1648","evangelischen","1492","Reformation","1517","1618","katholischen","Bibel","Buchdruck","95","1800","Handelsbeziehungen","1500","Kriege","Moderne","Parlament","Absolutismus"];
+const LT_SENT = [
+  "Die Frühe Neuzeit begann ungefähr um das Jahr [1500] und endete um [1800].",
+  "Sie liegt zwischen dem Mittelalter und der [Moderne].",
+  "Um 1450 erfand Johannes Gutenberg den [Buchdruck].",
+  "Dadurch konnten Bücher wie die [Bibel] viel schneller und billiger verbreitet werden.",
+  "Ein ganz wichtiges Ereignis war die [Reformation].",
+  "Sie begann mit Martin Luthers [95] Thesen im Jahr [1517].",
+  "Die Folge: eine Spaltung der [katholischen] Kirche und die Gründung der [evangelischen] Kirche.",
+  "Auch [Christoph Kolumbus] veränderte die Welt, als er im Jahr [1492] Amerika erreichte.",
+  "Danach gab es viele [Handelsbeziehungen] zwischen Europa, Afrika und Amerika.",
+  "In Frankreich entstand der [Absolutismus] – dort hatte der König sehr viel Macht.",
+  "In England dagegen bekam das [Parlament] mehr Einfluss.",
+  "Es war auch eine Zeit großer [Kriege], zum Beispiel der Dreißigjährige Krieg von [1618] bis [1648]."
+];
+
+const T = (q, tf, why) => ({ q, tf, why });
+const M = (q, a, why) => ({ q, a, why });
+
+const BANKS = {
+  luther: [
+    M("Was geschah am 31. Oktober 1517?", ["Luther schlug 95 Thesen an eine Kirchentür.","Luther wurde Papst.","Der Reichstag zu Worms begann.","Der Augsburger Religionsfrieden wurde beschlossen."], "Am 31.10.1517 machte Luther seine 95 Thesen öffentlich – der Start der Reformation."),
+    M("Was kritisierte Martin Luther besonders an der Kirche?", ["den Ablasshandel","zu viele Gottesdienste","zu wenig Kirchenmusik","das Klosterleben"], "Luther ärgerte sich am meisten über den Ablasshandel."),
+    M("Was ist ein Ablassbrief?", ["ein angeblicher Erlass von Sündenstrafen gegen Geld","ein Einladungsschreiben zur Messe","ein Reiseausweis für Pilger","ein Freibrief zum Beten"], "Man zahlte Geld und bekam dafür angeblich weniger Strafe für seine Sünden."),
+    M("Wie verbreiteten sich Luthers Ideen besonders schnell?", ["durch den Buchdruck","durch Brieftauben","durch Prediger zu Fuß","über das Radio"], "Dank Gutenbergs Buchdruck konnten Luthers Schriften tausendfach gedruckt werden."),
+    M("Wie hieß die Verordnung, die Luther aus der Gemeinschaft ausschloss?", ["Wormser Edikt","Augsburger Interim","Wittenberger Befehl","Speyerer Erklärung"], "Das Wormser Edikt (1521) – Luther wurde damit geächtet."),
+    M("Unter welchem Namen lebte Luther auf der Wartburg?", ["Junker Jörg","Ritter Rolf","Pater Paul","Bruder Till"], "Versteckt auf der Wartburg nannte er sich „Junker Jörg“."),
+    M("Was bedeutet „Cuius regio, eius religio“?", ["Wessen Land, dessen Religion.","Der Papst bestimmt die Religion.","Die Bibel ist für alle da.","Jeder darf glauben, was er will."], "Der Landesherr bestimmte, welche Religion die Leute in seinem Land haben."),
+    M("Welche Folge hatte die Reformation für die Kirche?", ["Es entstand eine neue Konfession: die evangelische.","Die Kirche wurde ganz abgeschafft.","Die Kirche wurde stärker.","Alle Menschen wurden katholisch."], "Die Kirche spaltete sich – neben der katholischen gab es jetzt die evangelische."),
+    M("„Junker Jörg“ – wer war das?", ["Martin Luther, versteckt auf der Wartburg","ein Ritter im Dreißigjährigen Krieg","ein Papst","der Erfinder des Buchdrucks"], "Junker Jörg war Luthers Tarnname auf der Wartburg."),
+    M("Wie viele Thesen veröffentlichte Luther?", ["95","12","1517","50"], "95 Thesen – merk dir: 95 Thesen im Jahr 1517."),
+    T("Beim Ablasshandel konnte man sich angeblich mit Geld von Sündenstrafen freikaufen.", true, "Genau das hat Luther kritisiert."),
+    T("Luthers Ideen verbreiteten sich vor allem durch Brieftauben.", false, "Falsch – durch den Buchdruck."),
+  ],
+  werkstatt: [
+    M("Was bedeutet das Wort „Renaissance“?", ["Wiedergeburt (der Antike)","Neuer Glaube","Zeit der Ritter","Große Entdeckung"], "Renaissance = Wiedergeburt. Man entdeckte die Kunst und das Wissen der Antike neu."),
+    M("Wann war die Renaissance?", ["im 15. und 16. Jahrhundert","im 12. und 13. Jahrhundert","im 18. und 19. Jahrhundert","im 10. Jahrhundert"], "Die Renaissance ist die Epoche (der Kunst) im 15. und 16. Jahrhundert."),
+    M("Was bedeutet Humanismus?", ["Der Mensch steht im Mittelpunkt – Menschen sollen gebildet und klug sein.","Nur der König zählt.","Bildung ist unwichtig, nur Glaube zählt.","Die Lehre vom Krieg."], "Humanismus kommt von „menschlich“: Der Mensch steht im Mittelpunkt."),
+    M("Was gewann am Übergang vom Mittelalter zur Renaissance an Bedeutung?", ["der Handel","die Ritterturniere","der Burgenbau","die Hexenjagd"], "Der Handel wurde wichtiger – und dadurch wurden Kaufleute reich."),
+    M("Wer wurde durch den Handel reich?", ["die Kaufleute","die Bauern","die Mönche","die Ritter"], "Kaufleute verdienten am wachsenden Handel viel Geld."),
+    M("In welchen Bereichen gab es neue Ideen?", ["Kunst, Wissenschaft und Politik","nur in der Kirche","nur beim Militär","nur in der Landwirtschaft"], "Neue Ideen gab es in Kunst, Wissenschaft und Politik."),
+    T("In der Renaissance wurde das Denken wichtiger als die Religion – aber die Kirche behielt ihren Einfluss.", true, "Genau so steht es im Heft."),
+    T("In der Renaissance verlor die Kirche jeden Einfluss.", false, "Falsch – die Kirche behielt ihren Einfluss."),
+    M("Wie wurden Menschen in der Renaissance gemalt?", ["realistisch, auch nackt","nur als Heilige mit Goldhintergrund","nur als Strichmännchen","gar nicht – Menschen malen war verboten"], "Realistisch und auch nackt. Männer als Zeichen von Kraft und Heldentum, Frauen verführerisch."),
+    M("Leonardo da Vinci war …", ["Künstler und Wissenschaftler","König von Frankreich","Papst","Seefahrer"], "Leonardo da Vinci war Künstler UND Wissenschaftler."),
+    M("Warum öffnete Leonardo da Vinci Leichen?", ["Er wollte wissen, wie der Mensch innen aussieht und wie Krankheiten wirken.","Er suchte nach Gold.","Für einen Hexenprozess.","Weil der Papst es befahl."], "Er wollte verstehen, wie der Körper funktioniert und wie sich Krankheiten auswirken."),
+    M("Welcher Künstler malte den berühmten Feldhasen?", ["Albrecht Dürer","Leonardo da Vinci","Galileo Galilei","Martin Luther"], "Albrecht Dürer – „Feldhase“ steht in deinem Heft."),
+    M("Wer gehört NICHT zu den Wissenschaftlern dieser Zeit?", ["Christoph Kolumbus","Nikolaus Kopernikus","Galileo Galilei","Johannes Kepler"], "Kolumbus war Seefahrer. Wissenschaftler: Kopernikus, Galilei, Kepler, Newton, Merian."),
+    M("Welche Frau steht bei den Wissenschaftlern im Hefteintrag?", ["Maria Sibylla Merian","Maria Theresia","Hermine Granger","Bibi Blocksberg"], "Maria Sibylla Merian – Naturforscherin und Malerin."),
+    M("Welcher dieser Namen ist ein Wissenschaftler der Renaissance-Zeit?", ["Isaak Newton","Napoleon","Karl der Große","Johannes Gutenberg"], "Newton gehört zu den Wissenschaftlern: Kopernikus, Galilei, Kepler, Newton, Merian."),
+    M("Ergänze: Kopernikus, Galilei, Kepler, Newton und …", ["Maria Sibylla Merian","Martin Luther","Albrecht Dürer","Christoph Kolumbus"], "Die fünf Wissenschaftler: Kopernikus, Galilei, Kepler, Newton, Merian."),
+  ],
+  hexen: [
+    M("Wer galt im 15. Jahrhundert vor allem als Hexe?", ["Frauen","nur Kinder","nur Könige","nur Priester"], "Im 15. Jahrhundert galten vor allem Frauen als Hexen."),
+    M("Womit kannten sich viele dieser Frauen gut aus?", ["mit Kräutern – zur Heilung von Kranken","mit Waffen","mit Seefahrt","mit dem Buchdruck"], "Sie kannten sich gut mit Kräutern aus und heilten damit Kranke."),
+    M("Was ist eine Hebamme?", ["Sie hilft Frauen bei der Geburt – sie ist keine Ärztin.","eine Richterin","eine Nonne","eine Hexe"], "Eine Hebamme hilft bei der Geburt. Manche Hebammen wurden als Hexen beschuldigt."),
+    T("Auch Männer und Kinder wurden als Hexen bezeichnet und sogar verurteilt.", true, "Richtig – nicht nur Frauen."),
+    M("Wie sah man Hexerei und Magie im Mittelalter meistens?", ["als Aberglauben","als Wissenschaft","als Verbrechen mit Todesstrafe","als Sport"], "Im Mittelalter galt das noch größtenteils als Aberglaube."),
+    M("Was wurde im 16. Jahrhundert daraus?", ["eine geplante Verfolgung","ein Fest","ein Schulfach","nichts – man vergaß es"], "Im 16. Jahrhundert wurde daraus die geplante Verfolgung angeblicher Hexen."),
+    M("Was ist „Hexenwahn“?", ["eine nicht erklärbare Angst vor Menschen, die für Hexen gehalten werden","ein Zauberspruch","ein Kräutertrank","ein Gericht"], "Hexenwahn = unerklärbare Angst vor angeblichen Hexen."),
+    M("Was ist Aberglaube?", ["Man glaubt an etwas Übernatürliches, z. B. dass Freitag der 13. Unglück bringt.","Ein anderes Wort für Religion.","Wissen aus der Schule.","Eine Strafe vor Gericht."], "Beispiel aus dem Buch: Freitag der 13. bringt Unglück."),
+    M("Was passierte in den Hexenprozessen mit den Beschuldigten?", ["Sie wurden gefoltert, bis sie alles gestanden oder starben.","Sie wurden freundlich befragt und freigelassen.","Sie mussten eine Prüfung schreiben.","Sie bekamen einen Anwalt."], "Durch Folter gaben sie sogar Taten zu, die sie nie begangen hatten."),
+    M("Was war fast immer die Strafe?", ["der Tod – meist Verbrennen auf dem Scheiterhaufen","eine Geldstrafe","ein Jahr Gefängnis","Hausarrest"], "Die Strafe war fast immer der Tod, meist durch Verbrennen auf dem Scheiterhaufen."),
+    M("Was wurde der Bevölkerung erklärt – warum die Hexenprozesse nötig seien?", ["um den Teufel zu bekämpfen","um Geld zu sparen","um Kranke zu heilen","um Kriege zu gewinnen"], "Offiziell hieß es: Man muss den Teufel bekämpfen."),
+    M("Was war der WAHRE Grund für die Hexenprozesse?", ["Man wollte Angst verbreiten und Andersdenkende beseitigen.","Man wollte den Teufel bekämpfen.","Man wollte Kranke heilen.","Man wollte Kräuter verbieten."], "Merke den Unterschied: erklärt wurde „Teufel bekämpfen“ – tatsächlich wollte man Angst verbreiten und Andersdenkende beseitigen."),
+    M("Wer führte die Hexenprozesse durch?", ["Juristen – meist streng nach Vorschrift","Hebammen","Kinder","Kaufleute"], "Juristen beschäftigen sich mit dem Recht – sie führten die Prozesse."),
+    M("Was gaben Beschuldigte unter Folter z. B. zu?", ["einen Pakt mit dem Teufel geschlossen zu haben","Kräuter gestohlen zu haben","zu spät gekommen zu sein","Bücher gelesen zu haben"], "Ein Pakt ist ein Bündnis – angeblich mit dem Teufel."),
+    M("Wann endete die Hexenverfolgung in Europa?", ["Ende des 18. Jahrhunderts","Anfang des 15. Jahrhunderts","im Jahr 1517","Ende des 20. Jahrhunderts"], "Erst Ende des 18. Jahrhunderts."),
+    M("Wie viele Menschen wurden in Europa ungefähr als Hexen getötet (geschätzt)?", ["rund 50 000","rund 500","rund 5 Millionen","genau 198"], "Geschätzt rund 50 000 Menschen – genaue Zahlen gibt es nicht."),
+    M("In welchem Zeitraum wurden diese rund 50 000 Menschen getötet?", ["zwischen dem 13. und 18. Jahrhundert","zwischen 1618 und 1648","nur im Jahr 1500","im 20. Jahrhundert"], "Zwischen dem 13. und 18. Jahrhundert."),
+    M("Wie viele Menschen wurden in Salzburg bei den Zauberer-Jackl-Prozessen verhaftet?", ["198","50 000","95","18"], "198 Menschen (1675–1681)."),
+    M("Wer war der „Zauberer Jackl“ wirklich?", ["ein Bettler und Dieb namens Jakob Koller(er)","ein Bischof","ein Arzt","ein König"], "Ein Bettler und Dieb – richtiger Name Jakob Kollerer."),
+  ],
+  spaltung: [
+    M("Welche Missstände gab es in der Kirche?", ["Ablasshandel und Verweltlichung der Kirche","zu viele Bibeln","zu wenig Kirchen","zu viele Hexen"], "Ablasshandel und Verweltlichung (die Kirche kümmerte sich mehr um Geld und Macht)."),
+    M("Wie reagierte der Papst auf Luther?", ["Er drohte ihm den Ausschluss aus der Kirche an.","Er machte ihn zum Bischof.","Er gab ihm recht.","Er schenkte ihm die Wartburg."], "Der Papst drohte Luther mit dem Ausschluss aus der Kirche."),
+    M("Wie reagierte der Kaiser auf Luther?", ["Er verhängte die Reichsacht.","Er krönte ihn.","Er stellte ihm Soldaten zur Seite.","Gar nicht."], "Reichsacht = Luther war „vogelfrei“, also ohne jeden Schutz."),
+    M("Was war die Folge des Konflikts?", ["die Kirchenspaltung (Katholiken / Protestanten)","der Westfälische Friede","die Erfindung des Buchdrucks","die Entdeckung Amerikas"], "Die Kirche spaltete sich in Katholiken und Protestanten."),
+    M("Wessen Lehren fanden neben Luther auch weite Verbreitung?", ["Johannes Calvin und Ulrich Zwingli","Galilei und Kepler","Kolumbus und Gutenberg","Leonardo und Dürer"], "Calvin und Zwingli – zwei weitere Reformatoren."),
+    M("Bei welchem Konzil wurde die katholische Kirche erneuert?", ["Konzil von Trient","Konzil von Wittenberg","Konzil von Worms","Konzil von Prag"], "Das Konzil von Trient – Start der Gegenreformation."),
+    M("Wer setzte die Beschlüsse des Konzils um?", ["der neu gegründete Jesuitenorden","die Union","die Liga","die Bauern"], "Der Jesuitenorden wurde dafür neu gegründet."),
+    M("Wie lange dauerte der Dreißigjährige Krieg?", ["1618–1648","1517–1547","1492–1522","1500–1800"], "1618 bis 1648 – genau 30 Jahre."),
+    M("Was war der Anlass für den Dreißigjährigen Krieg?", ["der Prager Fenstersturz","Luthers Thesen","das Konzil von Trient","die Entdeckung Amerikas"], "Der Prager Fenstersturz 1618."),
+    M("Wie wurde im Dreißigjährigen Krieg Krieg geführt?", ["mit Plünderung, Mord und Totschlag","nur mit Verhandlungen","fair und ohne Opfer","nur auf dem Meer"], "Plünderung, Mord und Totschlag – sehr brutal, auch gegen die Bevölkerung."),
+    M("Wie hieß das Heer der kaiserlichen (katholischen) Truppen?", ["Liga","Union","Jesuiten","Parlament"], "Liga = kaiserlich/katholisch. Union = protestantisch."),
+    M("Wie hieß das protestantische Heer?", ["Union","Liga","Konzil","Reichsacht"], "Union = protestantisch. Liga = kaiserlich/katholisch."),
+    M("In welchen Forderungen schrieben die Bauern auf, was sie wollten?", ["in den 12 Artikeln","in den 95 Thesen","im Wormser Edikt","im Westfälischen Frieden"], "Die 12 Artikel der Bauern – sie wurden nicht erfüllt, die Aufstände brutal niedergeschlagen."),
+    M("Was passierte mit den Bauernaufständen?", ["Sie wurden brutal niedergeschlagen.","Die Bauern bekamen alles, was sie wollten.","Die Bauern wurden Könige.","Sie wurden vergessen."], "Die Forderungen wurden nicht erfüllt – die Aufstände brutal niedergeschlagen."),
+    M("Wodurch endete der Dreißigjährige Krieg?", ["durch den Westfälischen Frieden","durch den Prager Fenstersturz","durch das Konzil von Trient","durch das Wormser Edikt"], "Der Westfälische Friede 1648 beendete den Krieg."),
+  ],
+  jahre: [
+    M("Wann erfand Gutenberg den Buchdruck?", ["um 1450","1492","1517","1618"], "Um 1450."),
+    M("Wann erreichte Kolumbus Amerika?", ["1492","1450","1517","1648"], "1492."),
+    M("Wann begann die Frühe Neuzeit ungefähr?", ["um 1500","um 1000","um 1800","um 1648"], "Um 1500 – und sie endete um 1800."),
+    M("Wann endete die Frühe Neuzeit ungefähr?", ["um 1800","um 1500","um 1648","um 1900"], "Um 1800."),
+    M("In welchem Jahr veröffentlichte Luther seine 95 Thesen?", ["1517","1492","1618","1450"], "1517."),
+    M("Wann begann der Dreißigjährige Krieg?", ["1618","1517","1648","1492"], "1618 – mit dem Prager Fenstersturz."),
+    M("Wann endete der Dreißigjährige Krieg?", ["1648","1618","1800","1517"], "1648 – Westfälischer Friede."),
+    M("Was geschah 1492?", ["Kolumbus erreichte Amerika.","Luthers Thesen","Beginn des Dreißigjährigen Kriegs","Erfindung des Buchdrucks"], "1492 = Kolumbus."),
+    M("Was geschah 1517?", ["Luther veröffentlichte die 95 Thesen.","Kolumbus erreichte Amerika.","Der Westfälische Friede","Gutenberg erfand den Buchdruck."], "1517 = Thesen = Start der Reformation."),
+    M("Was geschah 1648?", ["Der Dreißigjährige Krieg endete.","Der Dreißigjährige Krieg begann.","Luther wurde geboren.","Kolumbus fuhr los."], "1648 = Ende, Westfälischer Friede."),
+    M("Was geschah 1618?", ["Der Dreißigjährige Krieg begann (Prager Fenstersturz).","Der Dreißigjährige Krieg endete.","Die Thesen wurden veröffentlicht.","Amerika wurde entdeckt."], "1618 = Prager Fenstersturz = Kriegsbeginn."),
+    M("Welche Reihenfolge stimmt?", ["Buchdruck → Kolumbus → Thesen → Dreißigjähriger Krieg","Kolumbus → Buchdruck → Krieg → Thesen","Thesen → Buchdruck → Kolumbus → Krieg","Krieg → Thesen → Kolumbus → Buchdruck"], "1450 → 1492 → 1517 → 1618."),
+  ]
+};
+
+/* Lückentext Stufe 1 (Lücke für Lücke) automatisch aus den Sätzen bauen */
+(function buildLT() {
+  const nums = LT_BANK.filter(w => /^\d+$/.test(w)), words = LT_BANK.filter(w => !/^\d+$/.test(w));
+  const qs = [];
+  LT_SENT.forEach(s => {
+    const gaps = [...s.matchAll(/\[([^\]]+)\]/g)].map(m => m[1]);
+    gaps.forEach(g => {
+      let shown = s.replace("[" + g + "]", "_____").replace(/\[([^\]]+)\]/g, "$1");
+      const pool = (/^\d+$/.test(g) ? nums : words).filter(w => w !== g);
+      const wrong = shuffle(pool.slice()).slice(0, 3);
+      qs.push({ q: shown, a: [g, ...wrong], why: "Richtig ist: " + g, lt: true });
+    });
+  });
+  BANKS.zeit = qs;
+})();
+
+const WORLDS = [
+  { id: "zeit", name: "Zeitreise-Portal", sub: "Lückentext Frühe Neuzeit", tex: "crystal", test: true, video: "videos/01-fruehe-neuzeit.mp4" },
+  { id: "luther", name: "Kirchentür", sub: "Quiz Reformation", tex: "wood", test: true, video: "videos/02-reformation.mp4" },
+  { id: "werkstatt", name: "Renaissance-Werkstatt", sub: "Hefteintrag", tex: "gold", test: true, video: "videos/03-renaissance.mp4" },
+  { id: "hexen", name: "Hexenturm", sub: "Buch S. 15/16", tex: "obsidian", test: true, video: "videos/04-hexen.mp4" },
+  { id: "spaltung", name: "Kirchenspaltung", sub: "Arbeitsblatt + 30-j. Krieg", tex: "stone" },
+  { id: "jahre", name: "Jahreszahlen-Mine", sub: "Blitzrunde", tex: "ore" },
+];
+const BADGES = [
+  { id: "zeit", name: "Lückentext-Profi", tex: "crystal" },
+  { id: "luther", name: "Thesen-Meister", tex: "wood" },
+  { id: "werkstatt", name: "Renaissance-Genie", tex: "gold" },
+  { id: "hexen", name: "Hexenturm bezwungen", tex: "obsidian" },
+  { id: "spaltung", name: "Friedensstifter", tex: "stone" },
+  { id: "jahre", name: "Zahlen-Schürfer", tex: "ore" },
+  { id: "boss", name: "Boss besiegt", tex: "lava" },
+  { id: "streak", name: "3 Tage am Stück", tex: "grass" },
+];
+Object.keys(BANKS).forEach(k => BANKS[k].forEach((q, i) => q.id = k + "-" + i));
+const ALLQ = Object.values(BANKS).flat();
+const byId = Object.fromEntries(ALLQ.map(q => [q.id, q]));
+
+/* ===================== SPEICHER ===================== */
+const KEY = "clemens-lernwelt-v1";
+function fresh() { return { xp: 0, stars: {}, miss: {}, badges: {}, streak: { last: "", n: 0 }, sound: true, ltBest: 0, watched: {} }; }
+let S = fresh();
+try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(fresh(), JSON.parse(raw)); } catch (e) {}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+const level = () => Math.floor(S.xp / 200) + 1;
+const today = () => new Date().toISOString().slice(0, 10);
+function bumpStreak() {
+  const t = today(); if (S.streak.last === t) return;
+  const y = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+  S.streak.n = S.streak.last === y ? S.streak.n + 1 : 1; S.streak.last = t;
+  if (S.streak.n >= 3 && !S.badges.streak) { S.badges.streak = 1; later(() => toast("Abzeichen: 3 Tage am Stück!")); }
+}
+function addXP(n) {
+  const before = level(); S.xp += n; save();
+  if (level() > before) { sfx("level"); later(() => toast("LEVEL UP! Du bist jetzt Level " + level())); }
+}
+const later = fn => setTimeout(fn, 700);
+
+/* ===================== PIXEL-GRAFIK ===================== */
+function rng(seed) { return () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
+function tex(pal, seed, fn) {
+  const c = document.createElement("canvas"); c.width = c.height = 16; const x = c.getContext("2d"); const r = rng(seed);
+  for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++) { x.fillStyle = fn ? fn(i, j, r, pal) : pal[Math.floor(r() * pal.length)]; x.fillRect(i, j, 1, 1); }
+  return c.toDataURL();
+}
+function bitmap(rows, colors) {
+  const c = document.createElement("canvas"); c.width = rows[0].length; c.height = rows.length; const x = c.getContext("2d");
+  rows.forEach((row, j) => [...row].forEach((ch, i) => { if (colors[ch]) { x.fillStyle = colors[ch]; x.fillRect(i, j, 1, 1); } }));
+  return c.toDataURL();
+}
+const TEX = {
+  crystal: tex(["#2fb3b3", "#3fd0c9", "#1d8a8f", "#7af0e6", "#156b72"], 7),
+  wood: tex(null, 11, (i, j, r) => (j % 4 === 0 ? "#5a3a1c" : ["#8a5a2b", "#9c6a35", "#7b4f25"][Math.floor(r() * 3)])),
+  gold: tex(["#f3c623", "#ffdf4d", "#d9a514", "#fff08a", "#b8860b"], 23),
+  obsidian: tex(["#1d1230", "#2b1a47", "#120a1f", "#4a2a78", "#3a2160"], 31),
+  stone: tex(["#7d7d7d", "#8c8c8c", "#6a6a6a", "#9a9a9a", "#5e5e5e"], 41),
+  ore: tex(null, 53, (i, j, r) => (r() < .12 ? ["#ff9a3c", "#ffd36b"][Math.floor(r() * 2)] : ["#7d7d7d", "#6a6a6a", "#8c8c8c"][Math.floor(r() * 3)])),
+  lava: tex(["#e2531b", "#ff7a1a", "#b8300f", "#ffb02e", "#8f1f0a"], 61),
+  grass: tex(null, 71, (i, j, r) => (j < 4 || (j < 6 && r() < .5) ? ["#5fae35", "#4a8f2c", "#72c043"][Math.floor(r() * 3)] : ["#8a5a35", "#76492a", "#9b6a43", "#6a3f22"][Math.floor(r() * 4)])),
+  chest: tex(null, 83, (i, j, r) => (j === 6 || j === 7 ? (i > 6 && i < 9 ? "#ffd84a" : "#3b2410") : ["#9c6a35", "#8a5a2b", "#7b4f25"][Math.floor(r() * 3)])),
+  plank: tex(null, 97, (i, j, r) => (j % 8 === 0 || (j % 8 < 7 && i === ((j < 8) ? 5 : 12)) ? "#4e3016" : ["#8a5a2b", "#9c6a35", "#93622f"][Math.floor(r() * 3)])),
+};
+const AVATAR = bitmap([
+  "rrrrrrrr", "rrrrrrrv", "yyssssyy", "ywpsswpy", "ysgssgsy", "ssssssss", "sssmmsss", "yssssssy"
+], { r: "#d8342b", v: "#9c1f18", y: "#f0c64a", s: "#f1c29a", w: "#ffffff", p: "#1b1b1b", g: "#3e9a4a", m: "#b2554c" });
+const HEART = ["0110110", "1221111", "1211111", "1111111", "0111110", "0011100", "0001000"];
+const STAR = ["000010000", "000121000", "000111000", "111111111", "011111110", "001111100", "001101100", "011000110", "010000010"];
+const root = document.documentElement.style;
+root.setProperty("--tex-ground", `url(${TEX.grass})`);
+root.setProperty("--tex-plank", `url(${TEX.plank})`);
+root.setProperty("--tex-avatar", `url(${AVATAR})`);
+root.setProperty("--px-heart", `url(${bitmap(HEART, { 1: "#e5483b", 2: "#ffb1a9" })})`);
+root.setProperty("--px-heart-off", `url(${bitmap(HEART, { 1: "#3a2a2a", 2: "#4a3a3a" })})`);
+root.setProperty("--px-star", `url(${bitmap(STAR, { 1: "#ffcc33", 2: "#fff3a0" })})`);
+root.setProperty("--px-star-off", `url(${bitmap(STAR, { 1: "#00000088", 2: "#00000088" })})`);
+
+/* ===================== SOUND ===================== */
+let AC;
+function sfx(kind) {
+  if (!S.sound) return;
+  try {
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    const seq = { ok: [[660, .07], [990, .1]], bad: [[200, .12], [140, .18]], level: [[523, .08], [659, .08], [784, .08], [1046, .2]], win: [[784, .1], [988, .1], [1175, .22]], tap: [[880, .03]] }[kind];
+    let t = AC.currentTime;
+    seq.forEach(([f, d]) => { const o = AC.createOscillator(), g = AC.createGain(); o.type = "square"; o.frequency.value = f; g.gain.setValueAtTime(.06, t); g.gain.exponentialRampToValueAtTime(.001, t + d); o.connect(g).connect(AC.destination); o.start(t); o.stop(t + d); t += d; });
+  } catch (e) {}
+}
+
+/* ===================== HILFEN ===================== */
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const $ = s => document.querySelector(s);
+const app = $("#app");
+let toastT;
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 2600); }
+function starsHTML(n, cls = "") { return `<span class="stars ${cls}">${[1, 2, 3].map(i => `<i class="${i <= n ? "on" : ""}"></i>`).join("")}</span>`; }
+const missCount = () => Object.values(S.miss).filter(v => v > 0).length;
+const bossOpen = () => WORLDS.filter(w => (S.stars[w.id] || 0) > 0).length >= 4;
+
+/* ===================== STARTSEITE ===================== */
+function home() {
+  const lv = level(), pct = (S.xp % 200) / 2;
+  const mc = missCount();
+  app.innerHTML = `
+    <div class="ground"></div>
+    <div class="hud">
+      <div class="avatar" role="img" aria-label="Spielfigur"></div>
+      <div class="hud-txt">
+        <h1>Clemens' Lernwelt</h1>
+        <div class="xpbar" aria-label="Erfahrung"><i style="width:${pct}%"></i><b>${lv}</b></div>
+        <div class="stats"><span>XP <b>${S.xp}</b></span><span>Level <b>${lv}</b></span><span>Serie <b>${S.streak.n}</b> ${S.streak.n === 1 ? "Tag" : "Tage"}</span></div>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="sign"><span class="disp">Test nächste Woche!</span>Die Welten mit dem roten TEST-Schild kommen dran. Hol dir überall 3 Sterne – dann sitzt es.</div>
+      <h2>Welten</h2>
+      <div class="worlds">
+        ${WORLDS.map(w => `
+          <button class="world" data-w="${w.id}">
+            <div class="tex" style="background-image:url(${TEX[w.tex]})">${starsHTML(S.stars[w.id] || 0)}</div>
+            <div class="lbl"><span class="row" style="gap:4px">${w.test ? `<span class="tag">TEST</span>` : ""}${w.video && !S.watched[w.id] ? `<span class="tag y">▶ VIDEO</span>` : ""}</span><h3>${w.name}</h3><span>${w.sub}</span></div>
+          </button>`).join("")}
+        <button class="world wide ${bossOpen() ? "" : "locked"}" data-w="boss">
+          <div class="tex" style="background-image:url(${TEX.lava})"></div>
+          <div class="lbl"><span class="tag y">${bossOpen() ? "BOSS" : "GESPERRT"}</span><h3>Boss-Kampf</h3><span>${bossOpen() ? "20 Fragen aus allen Welten, 5 Herzen" : "Öffnet sich, wenn du in 4 Welten Sterne hast"}</span></div>
+        </button>
+        ${mc ? `<button class="world wide" data-w="fehler">
+          <div class="tex" style="background-image:url(${TEX.chest})"></div>
+          <div class="lbl"><span class="tag">${mc} offen</span><h3>Fehler-Truhe</h3><span>Alles, was du falsch hattest – bis es sitzt</span></div>
+        </button>` : ""}
+      </div>
+      <h2>Inventar</h2>
+      <div class="inv">${BADGES.map(b => `<div class="slot" title="${b.name}">${S.badges[b.id] ? `<i style="background-image:url(${TEX[b.tex]})" aria-label="${b.name}"></i>` : ""}</div>`).join("")}</div>
+      <p class="dim mini">Abzeichen gibt's für 3 Sterne in einer Welt, den Boss und 3 Tage am Stück. Die Belohnungen dafür legt Papa fest.</p>
+    </div>
+    <button class="btn small sound" id="snd">${S.sound ? "Ton an" : "Ton aus"}</button>`;
+  app.querySelectorAll("[data-w]").forEach(b => b.onclick = () => { sfx("tap"); openWorld(b.dataset.w); });
+  $("#snd").onclick = () => { S.sound = !S.sound; save(); home(); };
+  scrollTo(0, 0);
+}
+
+/* ===================== VIDEO ===================== */
+function videoScreen(w, weiter) {
+  const done = !!S.watched[w.id];
+  app.innerHTML = `
+    <div class="topbar"><button class="btn small" id="back">Zurück</button><h2>${w.name}</h2></div>
+    <div class="stack">
+      <div class="sign"><span class="disp">Erst schauen, dann kämpfen</span>${done ? "Du hast das Video schon gesehen – du kannst es jederzeit nochmal anschauen." : "Schau dir das Video bis zum Ende an. Dann öffnet sich das Quiz – und du bekommst +20 XP."}</div>
+      <video class="vid" id="vid" src="${w.video}" controls playsinline preload="metadata"></video>
+      <button class="btn go" id="go" ${done ? "" : "disabled"}>${done ? "Zum Quiz" : "Quiz gesperrt – erst Video schauen"}</button>
+    </div>`;
+  $("#back").onclick = home;
+  const go = $("#go");
+  go.onclick = () => { if (S.watched[w.id]) weiter(); };
+  $("#vid").addEventListener("ended", () => {
+    if (!S.watched[w.id]) { S.watched[w.id] = 1; bumpStreak(); addXP(20); save(); sfx("win"); toast("Video geschafft! +20 XP – Quiz offen"); }
+    go.disabled = false; go.textContent = "Zum Quiz";
+  });
+  scrollTo(0, 0);
+}
+
+function openWorld(id) {
+  const vw = WORLDS.find(x => x.id === id);
+  if (vw && vw.video && !S.watched[id]) return videoScreen(vw, () => startWorld(id));
+  startWorld(id);
+}
+function startWorld(id) {
+  if (id === "zeit") return ltMenu();
+  if (id === "boss") {
+    if (!bossOpen()) return toast("Erst in 4 Welten Sterne holen!");
+    const pool = shuffle(ALLQ.slice()).slice(0, 20);
+    return play({ id: "boss", name: "Boss-Kampf" }, pool, 5);
+  }
+  if (id === "fehler") {
+    const pool = shuffle(Object.keys(S.miss).filter(k => S.miss[k] > 0 && byId[k]).map(k => byId[k]));
+    return play({ id: "fehler", name: "Fehler-Truhe" }, pool, 5);
+  }
+  const w = WORLDS.find(x => x.id === id);
+  play(w, shuffle(BANKS[id].slice()), 3);
+}
+
+/* ===================== LÜCKENTEXT-MENÜ ===================== */
+function ltMenu() {
+  app.innerHTML = `
+    <div class="topbar"><button class="btn small" id="back">Zurück</button><h2>Zeitreise-Portal</h2></div>
+    <div class="stack">
+      <div class="sign"><span class="disp">Lückentext Frühe Neuzeit</span>Erst übst du Lücke für Lücke, dann machst du ihn komplett – genau wie im Test, mit Wörterkasten.</div>
+      <button class="btn" id="vid0">▶ Video nochmal ansehen</button>
+      <button class="btn" id="s1">Stufe 1 · Lücke für Lücke</button>
+      <button class="btn go" id="s2">Stufe 2 · Wie im Test</button>
+      <p class="dim mini">Bester Versuch Stufe 2: ${S.ltBest} / 18 richtig</p>
+    </div>`;
+  $("#back").onclick = home;
+  $("#s1").onclick = () => play({ id: "zeit", name: "Zeitreise-Portal" }, shuffle(BANKS.zeit.slice()), 3);
+  $("#s2").onclick = ltTest;
+  $("#vid0").onclick = () => videoScreen(WORLDS[0], ltMenu);
+  scrollTo(0, 0);
+}
+
+/* ===================== SPIELRUNDE ===================== */
+let R;
+function play(world, queue, hearts) {
+  R = { world, queue, i: 0, hearts, maxHearts: hearts, total: queue.length, firstTry: 0, mistakes: 0, missed: new Set(), requeued: {} };
+  if (!queue.length) { toast("Nichts zu tun – alles sitzt!"); return home(); }
+  question();
+}
+function question() {
+  const q = R.queue[R.i];
+  const opts = q.tf !== undefined ? ["Richtig", "Falsch"] : shuffle(q.a.slice());
+  const correct = q.tf !== undefined ? (q.tf ? "Richtig" : "Falsch") : q.a[0];
+  const done = Math.min(R.i, R.queue.length);
+  app.innerHTML = `
+    <div class="topbar"><button class="btn small" id="back">Aufgeben</button>
+      <div class="hearts" aria-label="${R.hearts} Herzen">${Array.from({ length: R.maxHearts }, (_, k) => `<i class="${k < R.hearts ? "" : "off"}"></i>`).join("")}</div></div>
+    <div class="prog"><i style="width:${(done / R.queue.length) * 100}%"></i></div>
+    <div class="qcard">
+      <span class="kind">${R.world.name.toUpperCase()} · ${done + 1}/${R.queue.length}${q.tf !== undefined ? " · RICHTIG ODER FALSCH?" : q.lt ? " · WELCHES WORT GEHÖRT IN DIE LÜCKE?" : ""}</span>
+      <p class="qtext">${q.q}</p>
+      <div class="opts">${opts.map((o, k) => `<button class="opt" data-k="${k}">${o}</button>`).join("")}</div>
+      <div id="fb"></div>
+    </div>`;
+  $("#back").onclick = home;
+  app.querySelectorAll(".opt").forEach(b => b.onclick = () => answer(b, opts[+b.dataset.k], correct, q));
+  scrollTo(0, 0);
+}
+function answer(btn, pick, correct, q) {
+  const ok = pick === correct;
+  app.querySelectorAll(".opt").forEach(b => { b.disabled = true; if (b.textContent === correct) b.classList.add("ok"); });
+  if (ok) {
+    sfx("ok");
+    if (!R.missed.has(q.id)) { R.firstTry++; addXP(10); }
+    if (S.miss[q.id] > 0) { S.miss[q.id]--; save(); }
+  } else {
+    sfx("bad"); btn.classList.add("bad");
+    R.hearts--; R.mistakes++; R.missed.add(q.id);
+    S.miss[q.id] = (S.miss[q.id] || 0) + 1; save();
+    R.requeued[q.id] = (R.requeued[q.id] || 0) + 1;
+    if (R.requeued[q.id] <= 2) R.queue.push(q);
+  }
+  const last = R.i + 1 >= R.queue.length;
+  const dead = R.hearts <= 0;
+  $("#fb").innerHTML = `
+    <div class="fb ${ok ? "ok" : "bad"}">
+      <span class="disp">${ok ? (R.missed.has(q.id) ? "Jetzt sitzt es!" : "Richtig! +10 XP") : "Leider falsch – ein Herz weg"}</span>
+      <p class="why">${q.why}${!ok ? " <span class='dim'>(Die Frage kommt nochmal.)</span>" : ""}</p>
+      <button class="btn go" id="next">${dead ? "Ergebnis" : last ? "Fertig" : "Weiter"}</button>
+    </div>`;
+  $("#next").focus({ preventScroll: true });
+  $("#fb").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  $("#next").onclick = () => { if (dead) return finish(false); R.i++; if (R.i >= R.queue.length) finish(true); else question(); };
+}
+function finish(alive) {
+  bumpStreak();
+  const w = R.world;
+  let stars = 0, bonus = 0;
+  if (alive) { stars = R.mistakes === 0 ? 3 : R.mistakes <= 2 ? 2 : 1; bonus = stars === 3 ? 50 : stars === 2 ? 20 : 0; }
+  if (bonus) addXP(bonus);
+  const prev = S.stars[w.id] || 0;
+  if (stars > prev && w.id !== "fehler" && w.id !== "boss") S.stars[w.id] = stars;
+  let badge = "";
+  if (stars === 3 && BADGES.find(b => b.id === w.id) && !S.badges[w.id] && w.id !== "zeit") { S.badges[w.id] = 1; badge = BADGES.find(b => b.id === w.id).name; }
+  if (w.id === "boss" && alive && !S.badges.boss) { S.badges.boss = 1; badge = "Boss besiegt"; }
+  save();
+  sfx(alive ? "win" : "bad");
+  app.innerHTML = `
+    <div class="stack result">
+      <h1>${alive ? (stars === 3 ? "PERFEKT!" : "GESCHAFFT!") : "BESIEGT!"}</h1>
+      <div class="bigstars">${[1, 2, 3].map(i => `<i class="${i <= stars ? "on" : ""}"></i>`).join("")}</div>
+      <p>${alive ? `${R.firstTry} von ${R.total} beim ersten Versuch richtig.` : "Keine Herzen mehr. Lies dir die Erklärungen nochmal durch und probier's gleich nochmal!"}</p>
+      ${alive ? `<p class="xpgain">+${R.firstTry * 10 + bonus} XP</p>` : ""}
+      ${badge ? `<div class="sign"><span class="disp">Neues Abzeichen!</span>${badge}</div>` : ""}
+      ${alive && stars < 3 ? `<p class="dim">3 Sterne gibt's nur ohne Fehler. Du schaffst das!</p>` : ""}
+      <div class="row" style="width:100%">
+        <button class="btn" id="home">Zur Welt-Karte</button>
+        <button class="btn go" id="again">Nochmal</button>
+      </div>
+    </div>`;
+  $("#home").onclick = home;
+  $("#again").onclick = () => openWorld(w.id);
+  scrollTo(0, 0);
+}
+
+/* ===================== LÜCKENTEXT WIE IM TEST ===================== */
+let LT;
+function ltTest() {
+  const gaps = []; LT_SENT.forEach(s => [...s.matchAll(/\[([^\]]+)\]/g)].forEach(m => gaps.push(m[1])));
+  LT = { gaps, fill: Array(gaps.length).fill(null), sel: 0, checked: false };
+  ltRender();
+}
+function ltRender() {
+  let n = 0;
+  const text = LT_SENT.map(s => s.replace(/\[([^\]]+)\]/g, () => {
+    const k = n++, v = LT.fill[k];
+    let cls = "gap" + (LT.sel === k && !LT.checked ? " sel" : "");
+    if (LT.checked) cls += v === LT.gaps[k] ? " ok" : " bad";
+    const fix = LT.checked && v !== LT.gaps[k] ? `<span class="fix">→ ${LT.gaps[k]}</span>` : "";
+    return `<button class="${cls}" data-g="${k}"><span class="n">${k + 1}</span>${v || "&nbsp;"}${fix}</button>`;
+  })).join(" ");
+  const used = LT.fill.filter(Boolean);
+  const right = LT.fill.filter((v, k) => v === LT.gaps[k]).length;
+  const full = used.length === LT.gaps.length;
+  app.innerHTML = `
+    <div class="topbar"><button class="btn small" id="back">Zurück</button><h2>Wie im Test</h2></div>
+    <div class="stack">
+      <p class="dim mini">${LT.checked ? "" : "Tipp auf eine Lücke, dann auf das passende Wort. Nochmal auf die Lücke tippen macht sie leer."}</p>
+      ${LT.checked ? `<div class="fb ${right === 18 ? "ok" : "bad"}"><span class="disp">${right} / 18 richtig${right === 18 ? " – PERFEKT!" : ""}</span><p class="why">${right === 18 ? "Der Lückentext sitzt. Abzeichen „Lückentext-Profi“ freigeschaltet!" : "Die roten Lücken zeigen dir das richtige Wort. Schau sie dir an und probier's nochmal."}</p></div>` : ""}
+      <div class="lt">${text}</div>
+      ${LT.checked ? `<div class="row"><button class="btn" id="home">Zur Welt-Karte</button><button class="btn go" id="again">Nochmal</button></div>` :
+        `<button class="btn go" id="check" ${full ? "" : "disabled style='opacity:.5'"}>${full ? "Auswerten" : `Noch ${LT.gaps.length - used.length} Lücken`}</button>`}
+    </div>
+    ${LT.checked ? "" : `<div class="bank" aria-label="Wörterkasten">${LT_BANK.map(w => { const cnt = used.filter(u => u === w).length; return `<button class="chip ${cnt ? "used" : ""}" data-w="${w}">${w}</button>`; }).join("")}</div>`}`;
+  $("#back").onclick = ltMenu;
+  app.querySelectorAll(".gap").forEach(b => b.onclick = () => {
+    if (LT.checked) return; const k = +b.dataset.g;
+    if (LT.sel === k && LT.fill[k]) LT.fill[k] = null;
+    LT.sel = k; sfx("tap"); ltRender();
+  });
+  app.querySelectorAll(".chip").forEach(c => c.onclick = () => {
+    if (LT.sel == null) return;
+    const w = c.dataset.w, prevIdx = LT.fill.indexOf(w);
+    if (prevIdx >= 0) LT.fill[prevIdx] = null;
+    LT.fill[LT.sel] = w; sfx("tap");
+    const nextEmpty = LT.fill.findIndex((v, k) => !v && k > LT.sel);
+    LT.sel = nextEmpty >= 0 ? nextEmpty : LT.fill.findIndex(v => !v);
+    if (LT.sel < 0) LT.sel = null;
+    const y = scrollY; ltRender(); scrollTo(0, y);
+  });
+  const ck = $("#check"); if (ck) ck.onclick = () => { if (!full) return; ltCheck(); };
+  const h = $("#home"); if (h) h.onclick = home;
+  const a = $("#again"); if (a) a.onclick = ltTest;
+}
+function ltCheck() {
+  LT.checked = true;
+  const right = LT.fill.filter((v, k) => v === LT.gaps[k]).length;
+  LT.gaps.forEach((g, k) => { const q = BANKS.zeit.find(x => x.a[0] === g && LT.fill[k] !== g); if (q) { S.miss[q.id] = (S.miss[q.id] || 0) + 1; } });
+  bumpStreak();
+  addXP(right * 5 + (right === 18 ? 100 : 0));
+  S.ltBest = Math.max(S.ltBest, right);
+  const stars = right === 18 ? 3 : right >= 16 ? 2 : right >= 12 ? 1 : 0;
+  if (stars > (S.stars.zeit || 0)) S.stars.zeit = stars;
+  if (right === 18 && !S.badges.zeit) S.badges.zeit = 1;
+  save(); sfx(right === 18 ? "win" : "bad");
+  ltRender(); scrollTo(0, 0);
+}
+
+home();
+</script>
