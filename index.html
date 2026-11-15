@@ -5,7 +5,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lernwelt">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Orbitron:wght@600;800&family=Rajdhani:wght@500;700&family=Bebas+Neue&family=Inter:wght@500;700;800&family=Barlow+Condensed:wght@500;700;800&family=Barlow:wght@500;700&family=Russo+One&family=Pirata+One&family=Spectral:wght@500;700&display=swap">
 <style>
 /* Layout: eine schmale Spalte wie ein Handy-Spielmenü – Erdband oben, Welten als Block-Kacheln, Spiel-Screens darunter. Bewusst nur ein (Nacht-)Look. */
 :root {
@@ -199,6 +199,7 @@ img.dia { width: 18px; height: auto; vertical-align: -2px; image-rendering: pixe
 .voucher .disp { font-size: 10px; color: #8a5a2b; } .voucher .big { color: #222; }
 .pin { font-family: var(--display); font-size: 26px; letter-spacing: .5em; text-align: center; padding: 14px; background: #000; color: var(--gold); border: 4px solid var(--stone); width: 100%; }
 .txt { font: inherit; font-size: 22px; padding: 10px 12px; background: #0d0f1c; color: var(--ink); border: 4px solid #000; box-shadow: inset 0 0 0 2px #444; width: 100%; min-width: 0; flex: 1 1 140px; }
+.stack > .txt { flex: none; }
 .log { background: #0d0f1c; border: 4px solid #000; padding: 10px 12px; font-size: 19px; display: flex; flex-direction: column; gap: 4px; }
 .log b { color: #7af0e6; font-weight: 400; } .log b.neg { color: #ff8a7f; }
 .guide section { background: var(--night-2); border: 4px solid #000; box-shadow: 4px 4px 0 #000; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
@@ -208,6 +209,182 @@ img.dia { width: 18px; height: auto; vertical-align: -2px; image-rendering: pixe
 .guide table { width: 100%; border-collapse: collapse; font-size: 20px; }
 .guide td { padding: 6px 4px; border-bottom: 2px solid #000; vertical-align: top; }
 .guide td:last-child { text-align: right; white-space: nowrap; color: #7af0e6; padding-left: 10px; }
+/* Design-Auswahl */
+.theme-item .sw { width: 52px; height: 52px; flex: none; border: 3px solid #000; }
+.theme-item.locked { opacity: .55; }
+
+/* ===================== MODERNE DESIGNS =====================
+   Gemeinsame Schicht für alle Designs außer Block: schaltet Pixel-Optik ab und
+   baut alles aus Variablen; jedes Design setzt nur seine Variablen + Spezialeffekte. */
+body.modern { background: var(--m-bg); background-color: var(--m-solid); background-attachment: fixed; color: var(--m-ink); font-family: var(--m-body); font-size: 17px; line-height: 1.35; }
+body.modern::before { background: var(--m-solid); }
+.modern .ground { display: none; }
+.modern .wrap { padding-top: 8px; }
+.modern h1, .modern h2, .modern h3, .modern .disp { font-family: var(--m-head); text-shadow: none; letter-spacing: var(--m-ls, .02em); text-transform: var(--m-tt, none); }
+.modern h1 { font-size: 24px; line-height: 1.15; }
+.modern h2 { font-size: 17px; }
+.modern h3 { font-size: 14px; }
+.modern .dim { color: var(--m-dim); }
+.modern .mini { font-size: 14px; }
+.modern .avatar { border: 2px solid var(--m-accent); border-radius: var(--m-ava-r, 12px); box-shadow: var(--m-glow); }
+.modern .xpbar { background: var(--m-track); border: 0; box-shadow: none; height: 10px; border-radius: var(--m-r); overflow: hidden; }
+.modern .xpbar > i { background: var(--m-bar); }
+.modern .xpbar > b { display: none; }
+.modern .stats { font-size: 15px; }
+.modern .stats span b { color: var(--m-accent); }
+.modern .sign, .modern .qcard, .modern .world, .modern .pcgoal, .modern .item, .modern .log, .modern .guide section, .modern .inv {
+  background: var(--m-panel); background-image: none; border: 1px solid var(--m-border); border-radius: var(--m-r); box-shadow: var(--m-glow); color: var(--m-ink); text-shadow: none;
+}
+.modern .world { overflow: hidden; }
+.modern .sign .disp, .modern .pcg-txt .disp, .modern .qcard .kind, .modern .guide h3 { font-size: 12px; color: var(--m-accent2); }
+.modern .world:active { transform: scale(.98); box-shadow: var(--m-glow); }
+.modern .world .tex { background-image: none !important; border-bottom: 1px solid var(--m-border); }
+.modern .world .tex::before { content: ""; position: absolute; inset: 0; background: var(--m-art); filter: hue-rotate(calc(var(--i, 0) * 55deg)); }
+.modern .world .tex .stars { z-index: 1; }
+.modern .world.wide .tex { border-bottom: 0; border-right: 1px solid var(--m-border); }
+.modern .world .lbl h3 { font-size: 13px; }
+.modern .world .lbl span { font-size: 13px; color: var(--m-dim); }
+.modern .world.locked { filter: grayscale(1) brightness(.6); }
+.modern .tag { font-family: var(--m-head); font-size: 10px; border-radius: 4px; background: #e5483b; color: #fff; letter-spacing: .06em; }
+.modern .tag.y { background: var(--m-accent); color: var(--m-go-fg); }
+.modern .inv { padding: 8px; }
+.modern .slot { background: var(--m-track); box-shadow: none; border-radius: 6px; }
+.modern .btn { font-family: var(--m-head); font-size: 14px; text-shadow: none; background: var(--m-btn); color: var(--m-btn-fg); border: 1px solid var(--m-border); border-radius: var(--m-r); box-shadow: none; text-transform: var(--m-tt, none); letter-spacing: var(--m-ls, .02em); }
+.modern .btn:active { transform: translateY(1px); box-shadow: none; }
+.modern .btn.go { background: var(--m-go); color: var(--m-go-fg); border-color: transparent; box-shadow: var(--m-go-shadow, none); }
+.modern .btn.small { font-size: 12px; }
+.modern .prog { background: var(--m-track); border: 0; border-radius: var(--m-r); height: 8px; overflow: hidden; }
+.modern .prog > i { background: var(--m-bar); }
+.modern .qtext { font-size: 21px; line-height: 1.25; }
+.modern .qcard .kind, .modern .gap .n { font-family: var(--m-head); letter-spacing: .04em; }
+.t-street .qcard .kind, .t-pirat .qcard .kind { font-size: 17px; }
+.modern .opt { font-size: 17px; line-height: 1.25; background: var(--m-btn); color: var(--m-btn-fg); border: 1px solid var(--m-border); border-radius: var(--m-r); box-shadow: none; text-shadow: none; }
+.modern .opt.ok { background: #1f9d4c; border-color: #1f9d4c; color: #fff; box-shadow: none; }
+.modern .opt.bad { background: #c73a33; border-color: #c73a33; color: #fff; box-shadow: none; }
+.modern .fb { border: 0; border-radius: var(--m-r); }
+.modern .fb .disp { font-size: 13px; }
+.modern .fb .why { font-size: 16px; }
+.modern .lt { font-size: 17px; border-radius: var(--m-r); box-shadow: none; border: 0; }
+.modern .gap { font-size: 15px; }
+.modern .bank { background: var(--m-solid); border-top: 1px solid var(--m-border); }
+.modern .chip { font-size: 15px; border-radius: 6px; border-width: 1px; }
+.modern .xpgain, .modern .diagain { font-family: var(--m-head); text-shadow: none; }
+.modern .xpgain { color: var(--m-accent); }
+.modern .toast { font-family: var(--m-head); border-radius: var(--m-r); background: var(--m-solid); border: 1px solid var(--m-accent); color: var(--m-ink); font-size: 13px; }
+.modern .bar { background: var(--m-track); border: 0; box-shadow: none; border-radius: var(--m-r); overflow: hidden; height: 10px; }
+.modern .bar > i { background: var(--m-bar); }
+.modern .pin, .modern .txt { border-radius: var(--m-r); border: 1px solid var(--m-border); background: var(--m-track); box-shadow: none; color: var(--m-ink); }
+.modern .pin { font-family: var(--m-head); }
+.modern .vid { border-radius: var(--m-r); border: 1px solid var(--m-border); box-shadow: none; }
+.modern .guide p { font-size: 16px; }
+.modern .guide table { font-size: 15px; }
+.modern .guide td { border-bottom: 1px solid var(--m-border); }
+.modern .guide b { text-decoration-color: var(--m-accent); }
+.modern .log { font-size: 15px; }
+.modern .sign .big { font-family: var(--m-head); }
+.modern .result h1 { font-size: 30px; }
+.modern .item h3 { font-size: 14px; }
+.modern .voucher { border-radius: var(--m-r); }
+.modern .theme-item .sw { border: 1px solid var(--m-border); border-radius: var(--m-r); }
+
+/* --- Neon --- */
+body.t-neon {
+  --m-solid: #05050b; --m-bg: radial-gradient(120% 50% at 50% 0%, #2a0a3a 0%, transparent 60%), linear-gradient(#ff2bd614 1px, transparent 1px), linear-gradient(90deg, #22e4ff12 1px, transparent 1px);
+  --m-panel: #0c0c1cdd; --m-border: #ff2bd655; --m-r: 12px; --m-glow: 0 0 22px #ff2bd622; --m-ink: #e9e8ff; --m-dim: #9a98c4;
+  --m-accent: #22e4ff; --m-accent2: #ff7ae6; --m-track: #16162a; --m-bar: linear-gradient(90deg, #22e4ff, #ff2bd6);
+  --m-btn: #0c0c1c; --m-btn-fg: #bff6ff; --m-go: linear-gradient(90deg, #ff2bd6, #7a3dff); --m-go-fg: #fff; --m-go-shadow: 0 0 20px #ff2bd666;
+  --m-head: Orbitron, sans-serif; --m-body: Rajdhani, sans-serif; --m-ava-r: 50%; --m-ls: .04em;
+  --m-art: repeating-linear-gradient(90deg, #22e4ff55 0 1px, transparent 1px 14px), linear-gradient(135deg, #ff2bd666, #0c0c1c 70%);
+  background-size: auto, 28px 28px, 28px 28px; font-size: 18px;
+}
+.t-neon h1 { font-size: 20px; text-shadow: 0 0 14px #ff2bd6aa; }
+.t-neon .tag { background: transparent; border: 1px solid #ff3b6b; color: #ff3b6b; box-shadow: 0 0 8px #ff3b6b66; }
+
+/* --- Street --- */
+body.t-street {
+  --m-solid: #252524; --m-bg: radial-gradient(#ffffff09 1px, transparent 1px), radial-gradient(#00000030 1px, transparent 1px), linear-gradient(180deg, #1c1c1b, #2f2e2c);
+  --m-panel: #efece4; --m-border: #111; --m-r: 0px; --m-glow: 5px 5px 0 #000; --m-ink: #f1eee6; --m-dim: #b9b5aa;
+  --m-accent: #ffd400; --m-accent2: #c43d00; --m-track: #111; --m-bar: repeating-linear-gradient(-45deg, #ffd400 0 8px, #111 8px 12px);
+  --m-btn: #111; --m-btn-fg: #fff; --m-go: #ffd400; --m-go-fg: #111; --m-go-shadow: 4px 4px 0 #000;
+  --m-head: "Bebas Neue", sans-serif; --m-body: Inter, sans-serif; --m-ava-r: 0; --m-ls: .04em;
+  --m-art: linear-gradient(160deg, transparent 40%, #ff5a1f 40% 52%, transparent 52%), repeating-linear-gradient(90deg, #a9a69e 0 22px, #9c9a93 22px 24px);
+  background-size: 7px 7px, 5px 5px, auto; font-size: 16px;
+}
+.t-street h1 { font-size: 34px; } .t-street h2 { font-size: 26px; } .t-street h3 { font-size: 17px; }
+.t-street .world .lbl h3, .t-stadion .world .lbl h3, .t-pirat .world .lbl h3 { font-size: 17px; }
+.t-street .btn { font-size: 20px; } .t-street .btn.small { font-size: 16px; }
+.t-street .sign, .t-street .qcard, .t-street .world, .t-street .pcgoal, .t-street .item, .t-street .guide section, .t-street .log { color: #111; }
+.t-street .sign .dim, .t-street .world .lbl span, .t-street .item .dim, .t-street .log .dim, .t-street .qcard .dim { color: #5d5a52; }
+.t-street .sign .disp, .t-street .pcg-txt .disp, .t-street .qcard .kind, .t-street .guide h3 { font-size: 18px; }
+.t-street .sign .big, .t-street .guide b, .t-street .log b { color: #111; }
+.t-street .guide td:last-child { color: #111; }
+.t-street .sign, .t-street .pcgoal { position: relative; }
+.t-street .sign::before, .t-street .pcgoal::before { content: ""; position: absolute; top: -8px; left: 50%; width: 64px; height: 16px; background: #ffd400cc; transform: translateX(-50%) rotate(-3deg); }
+.t-street .avatar { border: 0; transform: rotate(-4deg); box-shadow: 4px 4px 0 #000; outline: 4px solid #ffd400; }
+.t-street .tag { background: #111; color: #ffd400; border-radius: 0; transform: rotate(-3deg); }
+.t-street .opt { background: #111; color: #fff; }
+.t-street .stats span b { color: #ffd400; }
+.t-street .inv { background: #111; }
+.t-street .txt, .t-street .pin { background: #111; color: #fff; }
+
+/* --- Stadion --- */
+body.t-stadion {
+  --m-solid: #08111f; --m-bg: radial-gradient(60% 35% at 0% 0%, #ffffff2a, transparent 70%), radial-gradient(60% 35% at 100% 0%, #ffffff2a, transparent 70%), linear-gradient(180deg, #08111f 0%, #0a1a2b 60%, #0b2a1a 100%);
+  --m-panel: #ffffff0f; --m-border: #ffffff22; --m-r: 6px; --m-glow: none; --m-ink: #eef3f7; --m-dim: #a7b4c2;
+  --m-accent: #39d353; --m-accent2: #39d353; --m-track: #ffffff1a; --m-bar: #39d353;
+  --m-btn: #ffffff10; --m-btn-fg: #eef3f7; --m-go: #39d353; --m-go-fg: #06210f;
+  --m-head: "Barlow Condensed", sans-serif; --m-body: Barlow, sans-serif; --m-tt: uppercase; --m-ls: .05em; --m-ava-r: 6px;
+  --m-art: repeating-linear-gradient(90deg, #1f7a3a 0 18px, #23893f 18px 36px);
+}
+.t-stadion h1 { font-size: 28px; font-weight: 800; } .t-stadion h2 { font-size: 21px; font-weight: 800; } .t-stadion h3 { font-size: 17px; font-weight: 700; }
+.t-stadion .btn { font-size: 18px; font-weight: 700; } .t-stadion .btn.small { font-size: 15px; }
+.t-stadion .world .tex::before { filter: none; }
+.t-stadion .hud { background: linear-gradient(160deg, #f7e08a, #c9a23c 55%, #8a6a1c); color: #1b1407; padding: 14px 14px 30px; margin-top: 8px; clip-path: polygon(0 0, 100% 0, 100% 84%, 50% 100%, 0 84%); }
+.t-stadion .hud .avatar { border-color: #1b1407; box-shadow: none; }
+.t-stadion .hud .stats span b { color: #1b1407; }
+.t-stadion .hud .xpbar { background: #1b140733; } .t-stadion .hud .xpbar > i { background: #1b1407; }
+.t-stadion .sign { border-left: 4px solid #e5483b; }
+.t-stadion .sign .disp { color: #ff7a6e; }
+.t-stadion .tag { border-radius: 3px; }
+
+/* --- Battle Royale --- */
+body.t-battle {
+  --m-solid: #0d0a2a; --m-bg: radial-gradient(circle at 50% 12%, transparent 0 30%, #b25cff38 31%, transparent 33%), radial-gradient(circle at 50% 12%, transparent 0 44%, #b25cff22 45%, transparent 47%), linear-gradient(180deg, #2a1a6e 0%, #18104a 45%, #0d0a2a 100%);
+  --m-panel: #1a1446; --m-border: #ffffff22; --m-r: 10px; --m-glow: none; --m-ink: #fff; --m-dim: #b3acd9;
+  --m-accent: #ffd34d; --m-accent2: #ffd34d; --m-track: #ffffff1f; --m-bar: linear-gradient(90deg, #4dd8ff, #b25cff);
+  --m-btn: #ffffff14; --m-btn-fg: #fff; --m-go: linear-gradient(180deg, #ffd34d, #ff9a1f); --m-go-fg: #2a1300; --m-go-shadow: 0 4px 0 #a35a00;
+  --m-head: "Russo One", sans-serif; --m-body: Barlow, sans-serif; --m-tt: uppercase; --m-ls: .03em;
+  --m-art: linear-gradient(180deg, #8f5cff, #1a1446);
+}
+.t-battle h1, .t-battle h2 { font-style: italic; }
+.t-battle .avatar { border-color: #ffd34d; transform: skewX(-6deg); }
+.t-battle .xpbar, .t-battle .bar { transform: skewX(-12deg); }
+.t-battle .btn { transform: skewX(-5deg); }
+.t-battle .btn:active { transform: skewX(-5deg) translateY(2px); }
+.t-battle .world { box-shadow: inset 0 -4px 0 hsl(calc(var(--i, 0) * 55 + 260) 80% 62%); }
+.t-battle .tag { background: #ff3b6b; transform: skewX(-8deg); }
+
+/* --- Piraten-Anime --- */
+body.t-pirat {
+  --m-solid: #061219; --m-bg: radial-gradient(80% 30% at 50% 0%, #1d4a5e 0%, transparent 70%), repeating-linear-gradient(170deg, transparent 0 22px, #ffffff06 22px 24px), linear-gradient(180deg, #0b2230, #061219 70%);
+  --m-panel: #12303f; --m-border: #c9a24a66; --m-r: 4px; --m-glow: 0 0 0 3px #061219, 0 0 0 4px #c9a24a33; --m-ink: #efe4cc; --m-dim: #b8ab8f;
+  --m-accent: #e8c56a; --m-accent2: #c9a24a; --m-track: #061219; --m-bar: linear-gradient(90deg, #8a6a2a, #e8c56a);
+  --m-btn: #0b2230; --m-btn-fg: #efe4cc; --m-go: #8a1c14; --m-go-fg: #efe4cc;
+  --m-head: "Pirata One", serif; --m-body: Spectral, serif; --m-ls: .03em; --m-ava-r: 2px;
+  --m-art: radial-gradient(ellipse 30% 24% at 45% 60%, #c9a46a 0 70%, transparent 72%), radial-gradient(ellipse 36% 28% at 45% 62%, #2f6b5a 0 70%, transparent 72%), repeating-linear-gradient(175deg, #0f3446 0 8px, #12394c 8px 16px);
+}
+.t-pirat h1 { font-size: 30px; } .t-pirat h2 { font-size: 24px; color: #c9a24a; } .t-pirat h3 { font-size: 18px; font-weight: 400; }
+.t-pirat .btn { font-size: 19px; } .t-pirat .btn.small { font-size: 16px; }
+.t-pirat .sign .disp, .t-pirat .pcg-txt .disp, .t-pirat .qcard .kind, .t-pirat .guide h3 { font-size: 18px; }
+.t-pirat .world .tex::before { filter: hue-rotate(calc(var(--i, 0) * 20deg)); }
+.t-pirat .hud { background: #e9dcc0; background-image: radial-gradient(120% 120% at 50% 50%, transparent 55%, #8a6a3c66 100%); color: #2b1d10; padding: 14px; margin-top: 8px; box-shadow: 0 10px 30px #0008; flex-wrap: wrap; }
+.t-pirat .hud::before { content: "GESUCHT"; grid-column: 1 / -1; text-align: center; font-family: "Pirata One"; font-size: 34px; letter-spacing: .12em; line-height: 1; }
+.t-pirat .hud h1 { text-shadow: none; }
+.t-pirat .hud .avatar { border: 3px solid #2b1d10; box-shadow: none; }
+.t-pirat .hud .stats span b { color: #8a1c14; }
+.t-pirat .hud .xpbar { background: #2b1d1022; } .t-pirat .hud .xpbar > i { background: #8a1c14; }
+.t-pirat .sign { background: #e9dcc0; color: #2b1d10; } .t-pirat .sign .disp { color: #8a1c14; } .t-pirat .sign .big { color: #2b1d10; }
+.t-pirat .tag { background: #8a1c14; color: #efe4cc; font-size: 13px; font-weight: 400; border-radius: 2px; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 
@@ -384,6 +561,7 @@ function addXP(n) {
   if (level() > before) {
     sfx("level"); const nt = titleFor(level());
     later(() => toast("LEVEL UP! Level " + level() + (nt !== titleFor(before) ? " – neuer Titel: " + nt : "")));
+    THEMES.filter(t => t.lv > before && t.lv <= level()).forEach(t => later(() => toast("Neues Design freigeschaltet: " + t.name + "!")));
   }
 }
 
@@ -503,7 +681,7 @@ function home() {
       <div class="hud-txt">
         <h1>Clemens' Lernwelt</h1>
         <div class="xpbar" aria-label="Erfahrung"><i style="width:${pct}%"></i><b>${lv}</b></div>
-        <div class="stats"><span>Level <b>${lv}</b> · <b>${titleFor(lv)}</b></span><span>${DIA_IMG} <b>${S.dia}</b></span><span>Serie <b>${S.streak.n}</b> ${S.streak.n === 1 ? "Tag" : "Tage"}</span></div>
+        <div class="stats"><span><b>${voc().lv(lv)}</b> · <b>${titleFor(lv)}</b></span><span>${DIA_IMG} <b>${S.dia}</b></span><span>Serie <b>${S.streak.n}</b> ${S.streak.n === 1 ? "Tag" : "Tage"}</span></div>
       </div>
     </div>
     <div class="stack">
@@ -515,33 +693,73 @@ function home() {
       </button>
       <div class="row"><button class="btn go" id="shop">${DIA_IMG} Shop</button><button class="btn" id="pc2">PC-Topf</button></div>
       <div class="sign"><span class="disp">Test nächste Woche!</span>Die Welten mit dem roten TEST-Schild kommen dran. Hol dir überall 3 Sterne – dann sitzt es.</div>
-      <h2>Welten</h2>
+      <h2>${voc().w}</h2>
       <div class="worlds">
-        ${WORLDS.map(w => `
-          <button class="world" data-w="${w.id}">
+        ${WORLDS.map((w, i) => `
+          <button class="world" data-w="${w.id}" style="--i:${i}">
             <div class="tex" style="background-image:url(${TEX[w.tex]})">${starsHTML(S.stars[w.id] || 0)}</div>
             <div class="lbl"><span class="row" style="gap:4px">${w.test ? `<span class="tag">TEST</span>` : ""}${w.video && !S.watched[w.id] ? `<span class="tag y">▶ VIDEO</span>` : ""}</span><h3>${w.name}</h3><span>${w.sub}</span></div>
           </button>`).join("")}
-        <button class="world wide ${bossOpen() ? "" : "locked"}" data-w="boss">
+        <button class="world wide boss ${bossOpen() ? "" : "locked"}" data-w="boss" style="--i:6">
           <div class="tex" style="background-image:url(${TEX.lava})"></div>
-          <div class="lbl"><span class="tag y">${bossOpen() ? "BOSS" : "GESPERRT"}</span><h3>Boss-Kampf</h3><span>${bossOpen() ? "20 Fragen aus allen Welten, 5 Herzen" : "Öffnet sich, wenn du in 4 Welten Sterne hast"}</span></div>
+          <div class="lbl"><span class="tag y">${bossOpen() ? "BOSS" : "GESPERRT"}</span><h3>${voc().boss}</h3><span>${bossOpen() ? "20 Fragen aus allen Welten, 5 Herzen" : "Öffnet sich, wenn du in 4 Welten Sterne hast"}</span></div>
         </button>
-        ${mc ? `<button class="world wide" data-w="fehler">
+        ${mc ? `<button class="world wide" data-w="fehler" style="--i:3">
           <div class="tex" style="background-image:url(${TEX.chest})"></div>
           <div class="lbl"><span class="tag">${mc} offen</span><h3>Fehler-Truhe</h3><span>Alles, was du falsch hattest – bis es sitzt</span></div>
         </button>` : ""}
       </div>
       <h2>Inventar</h2>
       <div class="inv">${BADGES.map(b => `<div class="slot" title="${b.name}">${S.badges[b.id] ? `<i style="background-image:url(${TEX[b.tex]})" aria-label="${b.name}"></i>` : ""}</div>`).join("")}</div>
-      <button class="btn" id="guide">So funktioniert's · XP, Diamanten, Shop</button>
+      <div class="row"><button class="btn go" id="designs">Designs</button><button class="btn" id="guide">So funktioniert's</button></div>
       <button class="btn small" id="papa" style="align-self:flex-start">Papa-Bereich</button>
     </div>
     <button class="btn small sound" id="snd">${S.sound ? "Ton an" : "Ton aus"}</button>`;
   app.querySelectorAll("[data-w]").forEach(b => b.onclick = () => { sfx("tap"); openWorld(b.dataset.w); });
-  $("#shop").onclick = shop; $("#pc").onclick = pcScreen; $("#pc2").onclick = pcScreen; $("#guide").onclick = guide;
+  $("#shop").onclick = shop; $("#pc").onclick = pcScreen; $("#pc2").onclick = pcScreen; $("#guide").onclick = guide; $("#designs").onclick = designs;
   if (!S.guideSeen) { S.guideSeen = 1; save(); return guide(); }
   $("#papa").onclick = () => pinGate("Papa-Bereich", papa, home);
   $("#snd").onclick = () => { S.sound = !S.sound; save(); home(); };
+  scrollTo(0, 0);
+}
+
+/* ===================== DESIGNS ===================== */
+const THEMES = [
+  { id: "block", name: "Block", lv: 1, sw: "linear-gradient(135deg,#4a8f2c 0 30%,#8a5a35 30% 60%,#141a2b 60%)" },
+  { id: "neon", name: "Neon", lv: 3, sw: "linear-gradient(135deg,#05050b 0 40%,#ff2bd6 40% 55%,#22e4ff 55% 70%,#05050b 70%)" },
+  { id: "street", name: "Street", lv: 5, sw: "repeating-linear-gradient(-45deg,#ffd400 0 10px,#111 10px 20px)" },
+  { id: "stadion", name: "Stadion", lv: 8, sw: "linear-gradient(160deg,#f7e08a,#c9a23c 50%,#1f7a3a 50%)" },
+  { id: "battle", name: "Battle Royale", lv: 12, sw: "linear-gradient(160deg,#ffd34d 0 30%,#b25cff 30% 60%,#18104a 60%)" },
+  { id: "pirat", name: "Piraten-Anime", lv: 15, sw: "linear-gradient(160deg,#e9dcc0 0 35%,#8a1c14 35% 45%,#0b2230 45%)" },
+];
+const VOC = {
+  block: { w: "Welten", boss: "Boss-Kampf", lv: lv => "Level " + lv },
+  neon: { w: "Missionen", boss: "Boss-Level", lv: lv => "LVL " + lv },
+  street: { w: "Spots", boss: "Final Line", lv: lv => "Level " + lv },
+  stadion: { w: "Spieltage", boss: "Das Finale", lv: lv => "Rating " + Math.min(99, 60 + lv * 3) },
+  battle: { w: "Drop-Zones", boss: "Final Circle", lv: lv => "Tier " + lv },
+  pirat: { w: "Inseln", boss: "Der Endkampf", lv: () => "Kopfgeld " + (S.xp * 100).toLocaleString("de-AT") },
+};
+const curTheme = () => { const t = THEMES.find(x => x.id === S.theme); return t && level() >= t.lv ? t.id : "block"; };
+const voc = () => VOC[curTheme()];
+function applyTheme() { const t = curTheme(); document.body.className = t === "block" ? "" : "modern t-" + t; }
+function designs() {
+  const lv = level(), cur = curTheme();
+  app.innerHTML = `
+    <div class="topbar"><button class="btn small" id="back">Zurück</button><h2>Designs</h2></div>
+    <div class="stack">
+      <p class="dim mini">Neue Designs schaltest du mit Leveln frei. Du bist Level ${lv}. Deine Punkte bleiben bei jedem Design gleich.</p>
+      ${THEMES.map(t => {
+        const open = lv >= t.lv, on = t.id === cur;
+        return `<div class="item theme-item ${open ? "" : "locked"}">
+          <span class="sw" style="background:${t.sw}"></span>
+          <div style="flex:1;min-width:0"><h3>${t.name}</h3><span class="mini dim">${open ? (on ? "Aktiv" : "Freigeschaltet") : "Ab Level " + t.lv + " · noch " + ((t.lv - 1) * 200 - S.xp) + " XP"}</span></div>
+          <button class="btn small ${on ? "" : open ? "go" : ""}" data-t="${t.id}" ${open && !on ? "" : "disabled"}>${on ? "Aktiv" : open ? "Wählen" : "Gesperrt"}</button>
+        </div>`;
+      }).join("")}
+    </div>`;
+  $("#back").onclick = home;
+  app.querySelectorAll("[data-t]").forEach(b => b.onclick = () => { S.theme = b.dataset.t; save(); applyTheme(); sfx("level"); designs(); });
   scrollTo(0, 0);
 }
 
@@ -562,7 +780,7 @@ function guide() {
           <tr><td>Lückentext komplett richtig</td><td>+100 XP</td></tr>
         </table>
         <p>Alle 200 XP steigst du ein Level auf. Dein Titel wächst mit: ${TITLES.map(t => `<b>${t[1]}</b> (Lv ${t[0]})`).join(" → ")}.</p>
-        <p class="dim">Bald: Mit höheren Leveln schaltest du neue Designs für die App frei.</p>
+        <p>Mit höheren Leveln schaltest du neue <b>Designs</b> für die App frei: ${THEMES.filter(t => t.lv > 1).map(t => `${t.name} (Lv ${t.lv})`).join(", ")}.</p>
       </section>
 
       <section><h3>2 · Sterne</h3>
@@ -949,5 +1167,6 @@ function ltCheck() {
   ltRender(); scrollTo(0, 0);
 }
 
+applyTheme();
 home();
 </script>
