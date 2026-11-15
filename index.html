@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>Clemens' Lernwelt</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -178,6 +179,28 @@ p { margin: 0; }
 .toast { position: fixed; left: 50%; top: calc(16px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); z-index: 20; font-family: var(--display); font-size: 11px; background: #000; color: var(--gold); border: 3px solid var(--gold); padding: 12px 14px; max-width: calc(100% - 32px); text-align: center; line-height: 1.5; }
 .mini { font-size: 18px; }
 .sound { position: fixed; right: max(12px, env(safe-area-inset-right, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 5; }
+/* Diamanten, PC-Ziel, Shop, Papa */
+img.dia { width: 18px; height: auto; vertical-align: -2px; image-rendering: pixelated; }
+.btn img.dia { width: 14px; vertical-align: -1px; }
+.diagain { font-family: var(--display); font-size: 13px; color: #7af0e6; text-shadow: 2px 2px 0 #000; }
+.pcgoal { appearance: none; font: inherit; color: var(--ink); text-align: left; cursor: pointer; display: flex; gap: 12px; align-items: center; background: #0d0f1c; border: 4px solid #000; box-shadow: 4px 4px 0 #000, inset 0 0 0 2px #ff3df055; padding: 12px; width: 100%; }
+.pcgoal .pcico { width: 64px; flex: none; image-rendering: pixelated; }
+.pcg-txt { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
+.pcg-txt .disp { font-size: 10px; color: #ff7df5; }
+.bar { display: block; height: 14px; background: #000; border: 3px solid #000; box-shadow: 0 0 0 2px #444 inset; }
+.bar > i { display: block; height: 100%; min-width: 2px; background: linear-gradient(90deg, #7a3dff, #ff3df0); }
+.big-goal { cursor: default; }
+.big-goal .pcico { width: 88px; }
+.sign .big, .voucher .big { font-family: var(--display); font-size: 14px; line-height: 1.6; color: #fff; }
+.item { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--night-2); border: 4px solid #000; box-shadow: 4px 4px 0 #000; padding: 12px 14px; }
+.item h3 { font-size: 10px; margin-bottom: 6px; }
+.item .btn { flex: none; }
+.voucher { display: flex; flex-direction: column; gap: 10px; align-items: center; background: #f3ecd8; color: #222; border: 4px dashed #000; padding: 18px 16px; width: 100%; }
+.voucher .disp { font-size: 10px; color: #8a5a2b; } .voucher .big { color: #222; }
+.pin { font-family: var(--display); font-size: 26px; letter-spacing: .5em; text-align: center; padding: 14px; background: #000; color: var(--gold); border: 4px solid var(--stone); width: 100%; }
+.txt { font: inherit; font-size: 22px; padding: 10px 12px; background: #0d0f1c; color: var(--ink); border: 4px solid #000; box-shadow: inset 0 0 0 2px #444; width: 100%; min-width: 0; flex: 1 1 140px; }
+.log { background: #0d0f1c; border: 4px solid #000; padding: 10px 12px; font-size: 19px; display: flex; flex-direction: column; gap: 4px; }
+.log b { color: #7af0e6; font-weight: 400; } .log b.neg { color: #ff8a7f; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 
@@ -334,7 +357,7 @@ const byId = Object.fromEntries(ALLQ.map(q => [q.id, q]));
 
 /* ===================== SPEICHER ===================== */
 const KEY = "clemens-lernwelt-v1";
-function fresh() { return { xp: 0, stars: {}, miss: {}, badges: {}, streak: { last: "", n: 0 }, sound: true, ltBest: 0, watched: {} }; }
+function fresh() { return { xp: 0, stars: {}, miss: {}, badges: {}, streak: { last: "", n: 0 }, sound: true, ltBest: 0, watched: {}, dia: 0, diaInit: false, log: [], pin: "", pc: { goal: 900, eur: 0 }, month: { key: "", spent: 0 } }; }
 let S = fresh();
 try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(fresh(), JSON.parse(raw)); } catch (e) {}
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
@@ -345,10 +368,50 @@ function bumpStreak() {
   const y = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
   S.streak.n = S.streak.last === y ? S.streak.n + 1 : 1; S.streak.last = t;
   if (S.streak.n >= 3 && !S.badges.streak) { S.badges.streak = 1; later(() => toast("Abzeichen: 3 Tage am Stück!")); }
+  if (S.streak.n % 5 === 0) { addDia(5, S.streak.n + " Tage Serie"); later(() => toast(S.streak.n + " Tage am Stück! +5 Diamanten")); }
 }
+const TITLES = [[1, "Neuling"], [2, "Lehrling"], [3, "Knappe"], [5, "Ritter"], [8, "Gelehrter"], [12, "Meister"], [15, "Legende"]];
+const titleFor = lv => TITLES.filter(t => lv >= t[0]).pop()[1];
 function addXP(n) {
   const before = level(); S.xp += n; save();
-  if (level() > before) { sfx("level"); later(() => toast("LEVEL UP! Du bist jetzt Level " + level())); }
+  if (level() > before) {
+    sfx("level"); const nt = titleFor(level());
+    later(() => toast("LEVEL UP! Level " + level() + (nt !== titleFor(before) ? " – neuer Titel: " + nt : "")));
+  }
+}
+
+/* ===================== DIAMANTEN, SHOP, PC-TOPF ===================== */
+/* Diamanten gibt es nur für Neues: neue Sterne, erster Boss-Sieg, Serien, echte Noten (Papa). */
+const EUR_PER_DIA = 0.1;          // 10 Diamanten = 1 €
+const MONTH_BUDGET = 20;          // Papas Obergrenze pro Monat in € (PC-Topf + Döner + Kino)
+const SHOP = [
+  { id: "zock30", name: "30 Min. extra Zocken", price: 10, eur: 0 },
+  { id: "zock60", name: "1 Std. extra Zocken", price: 18, eur: 0 },
+  { id: "doener", name: "Döner", price: 40, eur: 8 },
+  { id: "kino", name: "Kino", price: 80, eur: 12 },
+];
+const GRADES = { 1: 20, 2: 12, 3: 5 };
+function addDia(n, why, eur) {
+  S.dia += n; S.log.unshift({ d: today(), t: why, n, e: eur || 0 }); S.log = S.log.slice(0, 60); save();
+}
+function earnStars(id, prev, stars) {
+  if (stars <= prev) return 0;
+  const n = (stars - prev) + (stars === 3 ? 3 : 0);
+  addDia(n, (stars === 3 ? "3 Sterne: " : "Neuer Stern: ") + (WORLDS.find(w => w.id === id) || { name: id }).name);
+  return n;
+}
+const monthKey = () => today().slice(0, 7);
+const spentMonth = () => S.month.key === monthKey() ? S.month.spent : 0;
+const budgetLeft = () => Math.max(0, MONTH_BUDGET - spentMonth());
+function spend(eur) { if (S.month.key !== monthKey()) S.month = { key: monthKey(), spent: 0 }; S.month.spent += eur; }
+const fmtEur = n => (Math.round(n * 100) / 100).toLocaleString("de-AT", { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }) + " €";
+async function hashPin(p) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("lernwelt:" + p));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+if (!S.diaInit) {  // Startguthaben für Sterne, die er vor dem Shop schon geholt hat
+  const start = Object.values(S.stars).reduce((a, n) => a + n + (n === 3 ? 3 : 0), 0) + (S.badges.boss ? 10 : 0);
+  S.diaInit = true; if (start) addDia(start, "Startguthaben für bisherige Sterne"); else save();
 }
 const later = fn => setTimeout(fn, 700);
 
@@ -389,6 +452,11 @@ root.setProperty("--px-heart", `url(${bitmap(HEART, { 1: "#e5483b", 2: "#ffb1a9"
 root.setProperty("--px-heart-off", `url(${bitmap(HEART, { 1: "#3a2a2a", 2: "#4a3a3a" })})`);
 root.setProperty("--px-star", `url(${bitmap(STAR, { 1: "#ffcc33", 2: "#fff3a0" })})`);
 root.setProperty("--px-star-off", `url(${bitmap(STAR, { 1: "#00000088", 2: "#00000088" })})`);
+const DIA = ["0011111100", "0123333210", "1233333321", "0123333210", "0012332100", "0001221000", "0000110000"];
+const DIA_SRC = bitmap(DIA, { 1: "#0e5a60", 2: "#3fd0c9", 3: "#a8fff6" });
+const DIA_IMG = `<img class="px dia" src="${DIA_SRC}" alt="Diamanten">`;
+const PC = ["0111111111111110", "0144444444444410", "0145555555555410", "0145566666655410", "0145555555555410", "0144444444444410", "0111111111111110", "0000001221000000", "0000111221110000", "0000111111110000"];
+const PC_SRC = bitmap(PC, { 1: "#000", 2: "#555", 4: "#2b2b3a", 5: "#1a1f3a", 6: "#ff3df0" });
 
 /* ===================== SOUND ===================== */
 let AC;
@@ -406,8 +474,13 @@ function sfx(kind) {
 function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 const $ = s => document.querySelector(s);
 const app = $("#app");
-let toastT;
-function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 2600); }
+const TQ = []; let tBusy = false;
+function toast(msg) { TQ.push(msg); if (!tBusy) nextToast(); }
+function nextToast() {
+  const t = $("#toast"), m = TQ.shift();
+  if (!m) { tBusy = false; t.hidden = true; return; }
+  tBusy = true; t.textContent = m; t.hidden = false; setTimeout(nextToast, 2400);
+}
 function starsHTML(n, cls = "") { return `<span class="stars ${cls}">${[1, 2, 3].map(i => `<i class="${i <= n ? "on" : ""}"></i>`).join("")}</span>`; }
 const missCount = () => Object.values(S.miss).filter(v => v > 0).length;
 const bossOpen = () => WORLDS.filter(w => (S.stars[w.id] || 0) > 0).length >= 4;
@@ -423,10 +496,17 @@ function home() {
       <div class="hud-txt">
         <h1>Clemens' Lernwelt</h1>
         <div class="xpbar" aria-label="Erfahrung"><i style="width:${pct}%"></i><b>${lv}</b></div>
-        <div class="stats"><span>XP <b>${S.xp}</b></span><span>Level <b>${lv}</b></span><span>Serie <b>${S.streak.n}</b> ${S.streak.n === 1 ? "Tag" : "Tage"}</span></div>
+        <div class="stats"><span>Level <b>${lv}</b> · <b>${titleFor(lv)}</b></span><span>${DIA_IMG} <b>${S.dia}</b></span><span>Serie <b>${S.streak.n}</b> ${S.streak.n === 1 ? "Tag" : "Tage"}</span></div>
       </div>
     </div>
     <div class="stack">
+      <button class="pcgoal" id="pc">
+        <img class="px pcico" src="${PC_SRC}" alt="">
+        <span class="pcg-txt"><span class="disp">Ziel: Gaming-PC</span>
+          <span class="bar"><i style="width:${Math.min(100, S.pc.eur / S.pc.goal * 100)}%"></i></span>
+          <span class="mini">${fmtEur(S.pc.eur)} von ${fmtEur(S.pc.goal)} im Topf</span></span>
+      </button>
+      <div class="row"><button class="btn go" id="shop">${DIA_IMG} Shop</button><button class="btn" id="pc2">PC-Topf</button></div>
       <div class="sign"><span class="disp">Test nächste Woche!</span>Die Welten mit dem roten TEST-Schild kommen dran. Hol dir überall 3 Sterne – dann sitzt es.</div>
       <h2>Welten</h2>
       <div class="worlds">
@@ -446,11 +526,151 @@ function home() {
       </div>
       <h2>Inventar</h2>
       <div class="inv">${BADGES.map(b => `<div class="slot" title="${b.name}">${S.badges[b.id] ? `<i style="background-image:url(${TEX[b.tex]})" aria-label="${b.name}"></i>` : ""}</div>`).join("")}</div>
-      <p class="dim mini">Abzeichen gibt's für 3 Sterne in einer Welt, den Boss und 3 Tage am Stück. Die Belohnungen dafür legt Papa fest.</p>
+      <p class="dim mini">Diamanten gibt's für jeden neuen Stern (+3 extra bei 3 Sternen), den ersten Boss-Sieg (+10), alle 5 Tage Serie (+5) und gute Noten im echten Test. Neue Designs schaltest du mit höheren Leveln frei – kommen bald.</p>
+      <button class="btn small" id="papa" style="align-self:flex-start">Papa-Bereich</button>
     </div>
     <button class="btn small sound" id="snd">${S.sound ? "Ton an" : "Ton aus"}</button>`;
   app.querySelectorAll("[data-w]").forEach(b => b.onclick = () => { sfx("tap"); openWorld(b.dataset.w); });
+  $("#shop").onclick = shop; $("#pc").onclick = pcScreen; $("#pc2").onclick = pcScreen;
+  $("#papa").onclick = () => pinGate("Papa-Bereich", papa, home);
   $("#snd").onclick = () => { S.sound = !S.sound; save(); home(); };
+  scrollTo(0, 0);
+}
+
+/* ===================== SHOP ===================== */
+function shop() {
+  const left = budgetLeft();
+  app.innerHTML = `
+    <div class="topbar"><button class="btn small" id="back">Zurück</button><h2>Shop</h2></div>
+    <div class="stack">
+      <div class="sign"><span class="disp">Dein Guthaben</span><span class="big">${DIA_IMG} ${S.dia} Diamanten</span><br>Einlösen geht nur zusammen mit Papa – er gibt seinen PIN ein.</div>
+      ${SHOP.map(it => {
+        const noDia = S.dia < it.price, noBud = it.eur > left;
+        return `<div class="item">
+          <div><h3>${it.name}</h3><span class="mini">${DIA_IMG} ${it.price}</span></div>
+          <button class="btn small ${noDia || noBud ? "" : "go"}" data-it="${it.id}" ${noDia || noBud ? "disabled" : ""}>${noDia ? `Noch ${it.price - S.dia}` : noBud ? "Diesen Monat aus" : "Einlösen"}</button>
+        </div>`;
+      }).join("")}
+      <p class="dim mini">Oder spar deine Diamanten für den Gaming-PC: 10 Diamanten = 1 € im PC-Topf.</p>
+      <button class="btn" id="pc">Zum PC-Topf</button>
+    </div>`;
+  $("#back").onclick = home; $("#pc").onclick = pcScreen;
+  app.querySelectorAll("[data-it]").forEach(b => b.onclick = () => {
+    const it = SHOP.find(x => x.id === b.dataset.it);
+    pinGate(it.name + " einlösen", () => {
+      if (S.dia < it.price || it.eur > budgetLeft()) return shop();
+      S.dia -= it.price; spend(it.eur);
+      S.log.unshift({ d: today(), t: "Eingelöst: " + it.name, n: -it.price, e: it.eur }); save();
+      sfx("win"); voucher(it);
+    }, shop);
+  });
+  scrollTo(0, 0);
+}
+function voucher(it) {
+  app.innerHTML = `
+    <div class="stack result">
+      <h1>EINGELÖST!</h1>
+      <div class="voucher"><span class="disp">Gutschein</span><span class="big">${it.name}</span><span class="mini">${new Date().toLocaleDateString("de-AT")} · ${it.price} Diamanten</span></div>
+      <p>Viel Spaß! Papa weiß Bescheid.</p>
+      <button class="btn go" id="home">Zur Welt-Karte</button>
+    </div>`;
+  $("#home").onclick = home; scrollTo(0, 0);
+}
+
+/* ===================== PC-TOPF ===================== */
+function pcScreen() {
+  const left = budgetLeft();
+  const maxEur = Math.min(Math.floor(S.dia * EUR_PER_DIA), Math.floor(left));
+  const pct = Math.min(100, S.pc.eur / S.pc.goal * 100);
+  app.innerHTML = `
+    <div class="topbar"><button class="btn small" id="back">Zurück</button><h2>PC-Topf</h2></div>
+    <div class="stack">
+      <div class="pcgoal big-goal">
+        <img class="px pcico" src="${PC_SRC}" alt="">
+        <span class="pcg-txt"><span class="disp">Gaming-PC</span>
+          <span class="bar"><i style="width:${pct}%"></i></span>
+          <span>${fmtEur(S.pc.eur)} von ${fmtEur(S.pc.goal)} · ${Math.floor(pct)} %</span></span>
+      </div>
+      <div class="sign"><span class="disp">Diamanten einzahlen</span>10 Diamanten = 1 €. Du hast ${DIA_IMG} ${S.dia} – das sind ${fmtEur(Math.floor(S.dia * EUR_PER_DIA))}.<br>Diesen Monat geht noch <b>${fmtEur(left)}</b> rein (Papas Grenze: ${MONTH_BUDGET} € im Monat).</div>
+      ${maxEur > 0 ? `<div class="row">${[1, 5, maxEur].filter((v, i, a) => v <= maxEur && a.indexOf(v) === i).map(v => `<button class="btn go" data-eur="${v}">${v === maxEur && v > 5 ? "Alles: " : ""}${fmtEur(v)} (${v * 10} ${DIA_IMG})</button>`).join("")}</div>`
+        : `<p class="dim">${left < 1 ? "Der PC-Topf ist für diesen Monat voll. Ab dem 1. geht's weiter – sammle bis dahin Diamanten!" : "Du brauchst mindestens 10 Diamanten. Hol dir Sterne!"}</p>`}
+      <p class="dim mini">Papa legt das Geld im Topf für dich zur Seite. Geburtstags- oder Weihnachtsgeld kann Papa auch dazulegen.</p>
+    </div>`;
+  $("#back").onclick = home;
+  app.querySelectorAll("[data-eur]").forEach(b => b.onclick = () => {
+    const eur = +b.dataset.eur; if (eur * 10 > S.dia || eur > budgetLeft()) return;
+    S.dia -= eur * 10; S.pc.eur += eur; spend(eur);
+    S.log.unshift({ d: today(), t: "In den PC-Topf: " + fmtEur(eur), n: -eur * 10, e: eur }); save();
+    sfx("win"); celebrate(); pcScreen();
+  });
+  scrollTo(0, 0);
+}
+function celebrate() {
+  const p = S.pc.eur / S.pc.goal * 100;
+  S.pc.marks = S.pc.marks || {};
+  for (const m of [25, 50, 75, 100]) if (p >= m && !S.pc.marks[m]) { S.pc.marks[m] = 1; save(); sfx("level"); toast(m === 100 ? "PC-TOPF VOLL! Zeit für den Gaming-PC!" : m + " % geschafft! Der PC kommt näher!"); return; }
+  toast("Eingezahlt! Der PC kommt näher.");
+}
+
+/* ===================== PAPA-PIN ===================== */
+function pinGate(title, onOk, onBack) {
+  const setMode = !S.pin; let first = null;
+  const draw = msg => {
+    app.innerHTML = `
+      <div class="topbar"><button class="btn small" id="back">Zurück</button><h2>${title}</h2></div>
+      <div class="stack">
+        <div class="sign"><span class="disp">${setMode ? (first ? "PIN wiederholen" : "Papa: PIN festlegen") : "Papa-PIN"}</span>${msg || (setMode ? "Leg einen 4-stelligen PIN fest, den nur du kennst. Damit bestätigst du Einlösungen und trägst Noten ein." : "Nur Papa gibt hier seinen PIN ein.")}</div>
+        <input class="pin" id="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" aria-label="PIN">
+        <button class="btn go" id="ok">OK</button>
+      </div>`;
+    const inp = $("#pin"); inp.focus();
+    $("#back").onclick = onBack;
+    const go = async () => {
+      const v = inp.value.trim();
+      if (!/^\d{4}$/.test(v)) return draw("Bitte genau 4 Ziffern.");
+      if (setMode && !first) { first = v; return draw("Gib denselben PIN nochmal ein."); }
+      if (setMode) { if (v !== first) { first = null; return draw("Die PINs waren verschieden. Nochmal von vorn."); } S.pin = await hashPin(v); save(); toast("PIN gespeichert"); return onOk(); }
+      if (await hashPin(v) === S.pin) return onOk();
+      sfx("bad"); draw("Falscher PIN.");
+    };
+    $("#ok").onclick = go; inp.onkeydown = e => { if (e.key === "Enter") go(); };
+  };
+  draw();
+}
+
+/* ===================== PAPA-BEREICH ===================== */
+function papa(msg) {
+  app.innerHTML = `
+    <div class="topbar"><button class="btn small" id="back">Fertig</button><h2>Papa-Bereich</h2></div>
+    <div class="stack">
+      ${msg ? `<div class="fb ok"><span class="disp">${msg}</span></div>` : ""}
+      <div class="sign"><span class="disp">Stand</span>${DIA_IMG} ${S.dia} Diamanten · Level ${level()}<br>PC-Topf: ${fmtEur(S.pc.eur)} von ${fmtEur(S.pc.goal)}<br>Diesen Monat ausgegeben: <b>${fmtEur(spentMonth())}</b> von ${MONTH_BUDGET} € (PC-Topf + Döner + Kino)</div>
+      <h3>Note im echten Test</h3>
+      <input class="txt" id="testname" placeholder="Welcher Test? z. B. Geschichte" maxlength="40">
+      <div class="row">${Object.entries(GRADES).map(([g, n]) => `<button class="btn go" data-g="${g}">Note ${g} · +${n}</button>`).join("")}</div>
+      <h3>Bonus-Diamanten</h3>
+      <div class="row"><button class="btn" data-b="5">+5</button><button class="btn" data-b="10">+10</button><button class="btn" data-b="20">+20</button></div>
+      <h3>Eigenes Geld in den PC-Topf</h3>
+      <p class="dim mini">z. B. Geburtstags- oder Weihnachtsgeld. Zählt nicht zur 20-€-Grenze.</p>
+      <div class="row"><input class="txt" id="geld" type="number" inputmode="decimal" min="0" step="1" placeholder="Betrag in €"><button class="btn go" id="geldok">Dazulegen</button></div>
+      <h3>Preis des Gaming-PCs</h3>
+      <div class="row"><input class="txt" id="ziel" type="number" inputmode="numeric" min="50" step="10" value="${S.pc.goal}"><button class="btn" id="zielok">Speichern</button></div>
+      <h3>Verlauf</h3>
+      <div class="log">${S.log.length ? S.log.slice(0, 25).map(l => `<div><span class="dim">${l.d.slice(8, 10)}.${l.d.slice(5, 7)}.</span> ${l.t} <b class="${l.n < 0 ? "neg" : ""}">${l.n > 0 ? "+" : ""}${l.n || ""}</b></div>`).join("") : `<span class="dim">Noch nichts passiert.</span>`}</div>
+      <button class="btn small" id="newpin" style="align-self:flex-start">PIN ändern</button>
+    </div>`;
+  $("#back").onclick = home;
+  app.querySelectorAll("[data-g]").forEach(b => b.onclick = () => {
+    const g = b.dataset.g, n = GRADES[g], name = $("#testname").value.trim();
+    addDia(n, "Note " + g + (name ? " – " + name : " im Test")); sfx("win"); papa("+" + n + " Diamanten für Note " + g);
+  });
+  app.querySelectorAll("[data-b]").forEach(b => b.onclick = () => { const n = +b.dataset.b; addDia(n, "Bonus von Papa"); sfx("win"); papa("+" + n + " Bonus-Diamanten"); });
+  $("#geldok").onclick = () => {
+    const v = Math.round(parseFloat($("#geld").value.replace(",", ".")) * 100) / 100; if (!(v > 0)) return;
+    S.pc.eur += v; S.log.unshift({ d: today(), t: "Papa legt " + fmtEur(v) + " in den PC-Topf", n: 0, e: v }); save(); celebrate(); papa(fmtEur(v) + " im PC-Topf");
+  };
+  $("#zielok").onclick = () => { const v = parseInt($("#ziel").value, 10); if (!(v >= 50)) return; S.pc.goal = v; save(); papa("PC-Preis: " + fmtEur(v)); };
+  $("#newpin").onclick = () => { const old = S.pin; S.pin = ""; pinGate("Neuer PIN", () => papa("Neuer PIN gespeichert"), () => { S.pin = old; save(); papa(); }); };
   scrollTo(0, 0);
 }
 
@@ -571,10 +791,11 @@ function finish(alive) {
   if (alive) { stars = R.mistakes === 0 ? 3 : R.mistakes <= 2 ? 2 : 1; bonus = stars === 3 ? 50 : stars === 2 ? 20 : 0; }
   if (bonus) addXP(bonus);
   const prev = S.stars[w.id] || 0;
-  if (stars > prev && w.id !== "fehler" && w.id !== "boss") S.stars[w.id] = stars;
+  let dia = 0;
+  if (stars > prev && w.id !== "fehler" && w.id !== "boss") { dia = earnStars(w.id, prev, stars); S.stars[w.id] = stars; }
   let badge = "";
   if (stars === 3 && BADGES.find(b => b.id === w.id) && !S.badges[w.id] && w.id !== "zeit") { S.badges[w.id] = 1; badge = BADGES.find(b => b.id === w.id).name; }
-  if (w.id === "boss" && alive && !S.badges.boss) { S.badges.boss = 1; badge = "Boss besiegt"; }
+  if (w.id === "boss" && alive && !S.badges.boss) { S.badges.boss = 1; badge = "Boss besiegt"; addDia(10, "Boss besiegt"); dia += 10; }
   save();
   sfx(alive ? "win" : "bad");
   app.innerHTML = `
@@ -583,6 +804,7 @@ function finish(alive) {
       <div class="bigstars">${[1, 2, 3].map(i => `<i class="${i <= stars ? "on" : ""}"></i>`).join("")}</div>
       <p>${alive ? `${R.firstTry} von ${R.total} beim ersten Versuch richtig.` : "Keine Herzen mehr. Lies dir die Erklärungen nochmal durch und probier's gleich nochmal!"}</p>
       ${alive ? `<p class="xpgain">+${R.firstTry * 10 + bonus} XP</p>` : ""}
+      ${dia ? `<p class="diagain">${DIA_IMG} +${dia} Diamanten</p>` : ""}
       ${badge ? `<div class="sign"><span class="disp">Neues Abzeichen!</span>${badge}</div>` : ""}
       ${alive && stars < 3 ? `<p class="dim">3 Sterne gibt's nur ohne Fehler. Du schaffst das!</p>` : ""}
       <div class="row" style="width:100%">
@@ -652,7 +874,8 @@ function ltCheck() {
   addXP(right * 5 + (right === 18 ? 100 : 0));
   S.ltBest = Math.max(S.ltBest, right);
   const stars = right === 18 ? 3 : right >= 16 ? 2 : right >= 12 ? 1 : 0;
-  if (stars > (S.stars.zeit || 0)) S.stars.zeit = stars;
+  const prev = S.stars.zeit || 0;
+  if (stars > prev) { const n = earnStars("zeit", prev, stars); S.stars.zeit = stars; later(() => toast("+" + n + " Diamanten!")); }
   if (right === 18 && !S.badges.zeit) S.badges.zeit = 1;
   save(); sfx(right === 18 ? "win" : "bad");
   ltRender(); scrollTo(0, 0);
