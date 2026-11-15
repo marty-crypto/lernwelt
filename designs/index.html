@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Design-Auswahl</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Rajdhani:wght@500;700&family=Bebas+Neue&family=Inter:wght@500;700;800&family=Barlow+Condensed:wght@500;700;800&family=Barlow:wght@500;700&family=Russo+One&family=Pirata+One&family=Spectral:wght@500;700&display=swap">
+<style>
+/* Vorschau: dieselbe Startseite in 5 Designs. Oben umschalten, Clemens sucht aus. */
+* { box-sizing: border-box; margin: 0; }
+html, body { min-height: 100%; }
+body { background: #000; color: #fff; font-family: Inter, system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
+button { font: inherit; color: inherit; cursor: pointer; }
+
+.pick { position: sticky; top: 0; z-index: 10; background: #000d; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: calc(10px + env(safe-area-inset-top, 0px)) 16px 10px; border-bottom: 1px solid #222; }
+.pick p { font-size: 13px; color: #aaa; margin-bottom: 8px; }
+.pick p b { color: #fff; }
+.tabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tabs button { flex: none; border: 1px solid #333; background: #111; border-radius: 999px; padding: 8px 13px; font-size: 13px; font-weight: 700; color: #bbb; }
+.tabs button[aria-pressed="true"] { background: #fff; color: #000; border-color: #fff; }
+
+.screen { min-height: 100vh; padding: 18px 16px 48px; transition: background .3s; }
+.inner { max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+.hud { display: flex; gap: 14px; align-items: center; }
+.ava { width: 64px; height: 64px; flex: none; display: grid; place-items: center; font-size: 30px; }
+.who { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.name { font-size: 22px; line-height: 1; }
+.xp { height: 10px; position: relative; overflow: hidden; }
+.xp i { position: absolute; inset: 0 auto 0 0; width: 62%; }
+.stats { display: flex; gap: 14px; font-size: 14px; flex-wrap: wrap; }
+.dia::before { content: ""; display: inline-block; width: 9px; height: 9px; transform: rotate(45deg); margin-right: 6px; vertical-align: 1px; background: currentColor; }
+.goal { display: flex; flex-direction: column; gap: 8px; text-align: left; width: 100%; padding: 14px; }
+.glabel { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+.gbar { height: 10px; position: relative; overflow: hidden; }
+.gbar i { position: absolute; inset: 0 auto 0 0; width: 18%; }
+.gsub { font-size: 13px; opacity: .8; }
+.btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.b { padding: 14px 10px; font-weight: 700; font-size: 15px; }
+.notice { padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.notice b { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
+h2 { font-size: 15px; letter-spacing: .12em; text-transform: uppercase; margin-top: 4px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.card { text-align: left; display: flex; flex-direction: column; overflow: hidden; position: relative; padding: 0; }
+.art { height: 64px; position: relative; }
+.body { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 5px; }
+.tag { align-self: flex-start; font-size: 10px; font-weight: 800; letter-spacing: .1em; padding: 3px 6px; }
+.cn { font-size: 14px; font-weight: 700; line-height: 1.15; }
+.cs { font-size: 12px; opacity: .7; }
+.st { position: absolute; right: 8px; top: 8px; font-size: 13px; letter-spacing: 2px; }
+.card.wide { grid-column: 1 / -1; flex-direction: row; }
+.card.wide .art { width: 92px; height: auto; flex: none; }
+.choose { margin-top: 10px; padding: 16px; font-weight: 800; font-size: 15px; text-align: center; width: 100%; }
+.note { font-size: 12px; opacity: .6; text-align: center; }
+
+/* ========== 1 NEON ========== */
+.t-neon { background: #05050b; background-image: radial-gradient(120% 60% at 50% 0%, #2a0a3a 0%, transparent 60%), linear-gradient(#ff2bd614 1px, transparent 1px), linear-gradient(90deg, #22e4ff12 1px, transparent 1px); background-size: auto, 28px 28px, 28px 28px; color: #e9e8ff; font-family: Rajdhani, sans-serif; }
+.t-neon .name, .t-neon h2, .t-neon .glabel, .t-neon .cn, .t-neon .notice b { font-family: Orbitron, sans-serif; }
+.t-neon .name { font-size: 19px; color: #fff; text-shadow: 0 0 12px #ff2bd6aa; }
+.t-neon .ava { border-radius: 50%; border: 2px solid #22e4ff; box-shadow: 0 0 16px #22e4ff88, inset 0 0 12px #22e4ff55; font-family: Orbitron; color: #22e4ff; text-shadow: 0 0 10px #22e4ff; }
+.t-neon .xp, .t-neon .gbar { background: #16162a; border-radius: 99px; }
+.t-neon .xp i, .t-neon .gbar i { background: linear-gradient(90deg, #22e4ff, #ff2bd6); box-shadow: 0 0 12px #ff2bd6; border-radius: 99px; }
+.t-neon .stats { font-size: 16px; font-weight: 700; } .t-neon .dia { color: #22e4ff; } .t-neon .acc { color: #ff2bd6; }
+.t-neon .goal, .t-neon .notice, .t-neon .card { background: #0c0c1cdd; border: 1px solid #ff2bd655; border-radius: 12px; box-shadow: 0 0 0 1px #ff2bd622, 0 0 24px #ff2bd622; }
+.t-neon .glabel { color: #ff7ae6; font-size: 12px; }
+.t-neon .b { border-radius: 10px; border: 1px solid #22e4ff66; background: #0c0c1c; color: #bff6ff; font-family: Orbitron; font-size: 13px; }
+.t-neon .b.p { background: linear-gradient(90deg, #ff2bd6, #7a3dff); border: 0; color: #fff; box-shadow: 0 0 22px #ff2bd677; }
+.t-neon .notice { border-color: #22e4ff55; font-size: 16px; } .t-neon .notice b { color: #22e4ff; font-size: 11px; }
+.t-neon h2 { color: #fff; font-size: 13px; }
+.t-neon .tag { background: transparent; border: 1px solid #ff3b6b; color: #ff3b6b; border-radius: 4px; box-shadow: 0 0 8px #ff3b6b66; }
+.t-neon .cn { font-size: 12px; } .t-neon .cs { font-size: 15px; }
+.t-neon .st { color: #ffe14d; text-shadow: 0 0 8px #ffe14d; }
+.t-neon .c0 .art { background: linear-gradient(135deg, #22e4ff33, transparent), repeating-linear-gradient(90deg, #22e4ff44 0 1px, transparent 1px 14px); }
+.t-neon .c1 .art { background: linear-gradient(135deg, #ff2bd633, transparent), repeating-linear-gradient(0deg, #ff2bd644 0 1px, transparent 1px 14px); }
+.t-neon .c2 .art { background: radial-gradient(circle at 30% 60%, #ffe14d55, transparent 50%), #0c0c1c; }
+.t-neon .c3 .art { background: radial-gradient(circle at 70% 40%, #7a3dff77, transparent 55%), #0c0c1c; }
+.t-neon .boss .art { background: conic-gradient(from 90deg, #ff2bd6, #22e4ff, #7a3dff, #ff2bd6); filter: blur(.5px); }
+.t-neon .choose { background: linear-gradient(90deg, #22e4ff, #ff2bd6); color: #05050b; border: 0; border-radius: 12px; font-family: Orbitron; }
+
+/* ========== 2 STREET ========== */
+.t-street { background-color: #2a2a29; background-image: radial-gradient(#ffffff09 1px, transparent 1px), radial-gradient(#00000030 1px, transparent 1px), linear-gradient(180deg, #1c1c1b, #2f2e2c); background-size: 7px 7px, 5px 5px, auto; background-position: 0 0, 2px 3px, 0 0; color: #f1eee6; font-family: Inter, sans-serif; }
+.t-street .name, .t-street h2, .t-street .glabel, .t-street .notice b { font-family: "Bebas Neue", sans-serif; letter-spacing: .04em; }
+.t-street .name { font-size: 34px; }
+.t-street .ava { background: #ffd400; color: #111; font-family: "Bebas Neue"; font-size: 40px; transform: rotate(-4deg); box-shadow: 4px 4px 0 #000; }
+.t-street .xp, .t-street .gbar { background: #111; height: 12px; }
+.t-street .xp i, .t-street .gbar i { background: repeating-linear-gradient(-45deg, #ffd400 0 8px, #111 8px 12px); }
+.t-street .stats { font-weight: 700; } .t-street .dia { color: #ffd400; } .t-street .acc { color: #ff5a1f; }
+.t-street .goal { background: #efece4; color: #111; box-shadow: 5px 5px 0 #000; position: relative; }
+.t-street .goal::before, .t-street .card::before { content: ""; position: absolute; top: -7px; left: 50%; width: 64px; height: 16px; background: #ffd400cc; transform: translateX(-50%) rotate(-3deg); }
+.t-street .glabel { font-size: 24px; color: #111; letter-spacing: .03em; }
+.t-street .gsub { font-weight: 700; }
+.t-street .b { background: #111; color: #fff; border: 2px solid #f1eee6; font-family: "Bebas Neue"; font-size: 22px; letter-spacing: .05em; }
+.t-street .b.p { background: #ffd400; color: #111; border-color: #111; box-shadow: 4px 4px 0 #000; }
+.t-street .notice { background: #ff5a1f; color: #111; transform: rotate(-1deg); box-shadow: 4px 4px 0 #000; font-weight: 700; }
+.t-street .notice b { font-size: 22px; letter-spacing: .04em; }
+.t-street h2 { font-size: 30px; letter-spacing: .04em; }
+.t-street .card { background: #efece4; color: #111; box-shadow: 5px 5px 0 #000; overflow: visible; margin-top: 6px; }
+.t-street .tag { background: #111; color: #ffd400; transform: rotate(-3deg); }
+.t-street .cn { font-weight: 800; } .t-street .cs { opacity: .65; }
+.t-street .st { color: #111; text-shadow: 0 0 0 #000; font-size: 15px; }
+.t-street .art { border-bottom: 3px solid #111; }
+.t-street .c0 .art { background: repeating-linear-gradient(90deg, #9c9a93 0 22px, #8f8d86 22px 24px), #9c9a93; }
+.t-street .c1 .art { background: linear-gradient(160deg, transparent 40%, #ff5a1f 40% 52%, transparent 52%), #b8b5ac; }
+.t-street .c2 .art { background: radial-gradient(circle at 25% 50%, #ffd400 0 14px, transparent 15px), radial-gradient(circle at 65% 40%, #111 0 9px, transparent 10px), #c9c6bd; }
+.t-street .c3 .art { background: repeating-linear-gradient(-45deg, #111 0 10px, #ffd400 10px 20px); }
+.t-street .boss .art { background: linear-gradient(135deg, #ff5a1f, #111); }
+.t-street .card.wide::before { left: 80%; }
+.t-street .choose { background: #ffd400; color: #111; border: 3px solid #111; box-shadow: 5px 5px 0 #000; font-family: "Bebas Neue"; font-size: 26px; letter-spacing: .05em; }
+
+/* ========== 3 STADION ========== */
+.t-stadion { background: radial-gradient(60% 40% at 0% 0%, #ffffff30, transparent 70%), radial-gradient(60% 40% at 100% 0%, #ffffff30, transparent 70%), linear-gradient(180deg, #08111f 0%, #0a1a2b 55%, #0b2a1a 100%); color: #eef3f7; font-family: Barlow, sans-serif; }
+.t-stadion .name, .t-stadion h2, .t-stadion .glabel, .t-stadion .b, .t-stadion .notice b, .t-stadion .cn { font-family: "Barlow Condensed", sans-serif; text-transform: uppercase; }
+.t-stadion .hud { background: linear-gradient(160deg, #f7e08a, #c9a23c 55%, #8a6a1c); color: #1b1407; padding: 14px; clip-path: polygon(0 0, 100% 0, 100% 82%, 50% 100%, 0 82%); padding-bottom: 30px; }
+.t-stadion .ava { width: 70px; height: 70px; flex-direction: column; display: flex; justify-content: center; align-items: center; background: none; font-family: "Barlow Condensed"; font-weight: 800; font-size: 40px; line-height: .9; border-right: 2px solid #1b140744; padding-right: 12px; }
+.t-stadion .ava small { font-size: 14px; letter-spacing: .1em; }
+.t-stadion .name { font-size: 28px; font-weight: 800; }
+.t-stadion .xp { background: #1b140733; } .t-stadion .xp i { background: #1b1407; }
+.t-stadion .stats { font-weight: 700; } .t-stadion .dia { color: #0e5a60; }
+.t-stadion .goal, .t-stadion .card, .t-stadion .notice { background: #ffffff0d; border: 1px solid #ffffff1f; border-radius: 6px; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+.t-stadion .glabel { color: #39d353; font-weight: 700; font-size: 18px; letter-spacing: .06em; }
+.t-stadion .gbar, .t-stadion .notice { } .t-stadion .gbar { background: #ffffff1a; } .t-stadion .gbar i { background: #39d353; }
+.t-stadion .b { border-radius: 6px; border: 1px solid #ffffff33; background: #ffffff10; font-size: 20px; font-weight: 700; letter-spacing: .05em; }
+.t-stadion .b.p { background: #39d353; color: #06210f; border: 0; }
+.t-stadion .notice { border-left: 4px solid #e5483b; } .t-stadion .notice b { color: #ff7a6e; font-size: 16px; letter-spacing: .08em; }
+.t-stadion h2 { font-family: "Barlow Condensed"; font-size: 22px; font-weight: 800; letter-spacing: .08em; }
+.t-stadion .tag { background: #e5483b; color: #fff; border-radius: 3px; }
+.t-stadion .cn { font-size: 19px; font-weight: 700; }
+.t-stadion .st { color: #f7e08a; }
+.t-stadion .art { background: repeating-linear-gradient(90deg, #1f7a3a 0 18px, #23893f 18px 36px); }
+.t-stadion .art::after { content: attr(data-n); position: absolute; left: 10px; bottom: 6px; font-family: "Barlow Condensed"; font-weight: 800; font-size: 13px; letter-spacing: .1em; color: #ffffffcc; }
+.t-stadion .boss .art { background: radial-gradient(circle at 50% 50%, #f7e08a 0 16px, transparent 17px), repeating-linear-gradient(90deg, #1f7a3a 0 18px, #23893f 18px 36px); }
+.t-stadion .choose { background: #39d353; color: #06210f; border: 0; border-radius: 6px; font-family: "Barlow Condensed"; font-size: 22px; letter-spacing: .06em; text-transform: uppercase; }
+
+/* ========== 4 BATTLE ROYALE ========== */
+.t-battle { background: radial-gradient(circle at 50% 18%, transparent 0 34%, #b25cff40 35%, transparent 37%), radial-gradient(circle at 50% 18%, transparent 0 46%, #b25cff26 47%, transparent 49%), linear-gradient(180deg, #2a1a6e 0%, #18104a 45%, #0d0a2a 100%); color: #fff; font-family: Barlow, sans-serif; }
+.t-battle .name, .t-battle h2, .t-battle .glabel, .t-battle .b, .t-battle .notice b, .t-battle .cn, .t-battle .tag { font-family: "Russo One", sans-serif; text-transform: uppercase; }
+.t-battle .ava { border-radius: 10px; background: linear-gradient(160deg, #ffd34d, #ff8a1f); color: #2a1300; font-family: "Russo One"; transform: skewX(-6deg); box-shadow: 0 6px 0 #00000055; }
+.t-battle .name { font-size: 22px; font-style: italic; }
+.t-battle .xp { background: #ffffff1f; border-radius: 3px; transform: skewX(-12deg); } .t-battle .xp i { background: linear-gradient(90deg, #4dd8ff, #b25cff); }
+.t-battle .stats { font-weight: 700; } .t-battle .dia { color: #4dd8ff; } .t-battle .acc { color: #ffd34d; }
+.t-battle .goal { background: linear-gradient(90deg, #ffffff12, #ffffff06); border: 1px solid #ffffff22; border-radius: 10px; }
+.t-battle .glabel { color: #ffd34d; font-size: 14px; }
+.t-battle .gbar { height: 14px; background: repeating-linear-gradient(90deg, #ffffff18 0 calc(10% - 3px), transparent calc(10% - 3px) 10%); transform: skewX(-12deg); }
+.t-battle .gbar i { background: repeating-linear-gradient(90deg, #ffd34d 0 calc(10% - 3px), transparent calc(10% - 3px) 10%); background-size: 555% 100%; }
+.t-battle .b { border-radius: 8px; border: 0; background: #ffffff1a; font-size: 15px; transform: skewX(-6deg); }
+.t-battle .b.p { background: linear-gradient(180deg, #ffd34d, #ff9a1f); color: #2a1300; box-shadow: 0 5px 0 #a35a00; }
+.t-battle .notice { background: #ff3b6b22; border: 1px solid #ff3b6b88; border-radius: 10px; } .t-battle .notice b { color: #ff7a9a; }
+.t-battle h2 { font-family: "Russo One"; font-size: 16px; font-style: italic; }
+.t-battle .card { border-radius: 10px; border: 0; color: #fff; background: #1a1446; box-shadow: inset 0 -4px 0 var(--r); }
+.t-battle .art { background: linear-gradient(180deg, var(--r), transparent); opacity: .9; }
+.t-battle .c0 { --r: #8a8fa3; } .t-battle .c1 { --r: #3fbf5f; } .t-battle .c2 { --r: #3b8bff; } .t-battle .c3 { --r: #b25cff; } .t-battle .boss { --r: #ffb52e; }
+.t-battle .rar { font-size: 10px; letter-spacing: .12em; color: var(--r); font-weight: 700; text-transform: uppercase; }
+.t-battle .tag { background: #ff3b6b; color: #fff; border-radius: 4px; transform: skewX(-8deg); }
+.t-battle .st { color: #ffd34d; }
+.t-battle .choose { background: linear-gradient(180deg, #ffd34d, #ff9a1f); color: #2a1300; border: 0; border-radius: 10px; box-shadow: 0 5px 0 #a35a00; font-family: "Russo One"; text-transform: uppercase; }
+
+/* ========== 5 PIRATEN-ANIME ========== */
+.t-pirat { background: radial-gradient(80% 30% at 50% 0%, #1d4a5e 0%, transparent 70%), repeating-linear-gradient(170deg, transparent 0 22px, #ffffff06 22px 24px), linear-gradient(180deg, #0b2230, #061219 70%); color: #efe4cc; font-family: Spectral, serif; }
+.t-pirat .name, .t-pirat h2, .t-pirat .glabel, .t-pirat .notice b, .t-pirat .cn, .t-pirat .b, .t-pirat .tag { font-family: "Pirata One", serif; letter-spacing: .03em; }
+.t-pirat .hud { background: #e9dcc0; background-image: radial-gradient(120% 120% at 50% 50%, transparent 55%, #8a6a3c66 100%); color: #2b1d10; padding: 14px; box-shadow: 0 10px 30px #0008; position: relative; flex-wrap: wrap; }
+.t-pirat .hud::before { content: "GESUCHT"; display: block; width: 100%; text-align: center; font-family: "Pirata One"; font-size: 34px; letter-spacing: .12em; line-height: 1; color: #2b1d10; }
+.t-pirat .ava { background: #2b1d10; color: #e9dcc0; font-family: "Pirata One"; font-size: 40px; border: 3px solid #2b1d10; outline: 2px solid #e9dcc0; outline-offset: -6px; }
+.t-pirat .name { font-size: 28px; }
+.t-pirat .bounty { font-family: "Pirata One"; font-size: 20px; color: #8a1c14; }
+.t-pirat .xp { background: #2b1d1022; } .t-pirat .xp i { background: #8a1c14; }
+.t-pirat .stats { font-weight: 700; } .t-pirat .dia { color: #0e6a70; }
+.t-pirat .goal, .t-pirat .card { background: #12303f; border: 1px solid #c9a24a66; box-shadow: 0 0 0 3px #061219, 0 0 0 4px #c9a24a33; border-radius: 4px; }
+.t-pirat .glabel { color: #c9a24a; font-size: 22px; text-transform: none; letter-spacing: .03em; }
+.t-pirat .gbar { background: #061219; border: 1px solid #c9a24a55; } .t-pirat .gbar i { background: linear-gradient(90deg, #8a6a2a, #e8c56a); }
+.t-pirat .b { border-radius: 4px; border: 1px solid #c9a24a88; background: #0b2230; font-size: 20px; color: #efe4cc; }
+.t-pirat .b.p { background: #8a1c14; border-color: #c9a24a; }
+.t-pirat .notice { background: #e9dcc0; color: #2b1d10; border-radius: 2px; } .t-pirat .notice b { color: #8a1c14; font-size: 20px; text-transform: none; letter-spacing: .02em; }
+.t-pirat h2 { font-size: 26px; text-transform: none; letter-spacing: .03em; color: #c9a24a; }
+.t-pirat .tag { background: #8a1c14; color: #efe4cc; font-size: 14px; font-weight: 400; letter-spacing: .04em; }
+.t-pirat .cn { font-size: 19px; font-weight: 400; }
+.t-pirat .st { color: #e8c56a; }
+.t-pirat .art { background: radial-gradient(ellipse 30% 22% at var(--x, 50%) 60%, #c9a46a 0 70%, transparent 72%), radial-gradient(ellipse 34% 26% at var(--x, 50%) 62%, #2f6b5a 0 70%, transparent 72%), repeating-linear-gradient(175deg, #0f3446 0 8px, #12394c 8px 16px); }
+.t-pirat .c0 .art { --x: 30%; } .t-pirat .c1 .art { --x: 65%; } .t-pirat .c2 .art { --x: 45%; } .t-pirat .c3 .art { --x: 72%; }
+.t-pirat .boss .art { background: radial-gradient(circle at 50% 55%, #8a1c14 0 14px, transparent 15px), repeating-linear-gradient(175deg, #2a0f0c 0 8px, #3a1410 8px 16px); }
+.t-pirat .choose { background: #8a1c14; color: #efe4cc; border: 1px solid #c9a24a; border-radius: 4px; font-family: "Pirata One"; font-size: 24px; }
+</style>
+</head>
+<body>
+<div class="pick">
+  <p><b>Welches Design willst du?</b> Tipp dich durch und sag Papa deinen Favoriten.</p>
+  <div class="tabs" id="tabs"></div>
+</div>
+<div class="screen" id="screen"><div class="inner" id="inner"></div></div>
+<script>
+const WORLDS = [["Zeitreise-Portal", "Lückentext Frühe Neuzeit", "★★☆"], ["Kirchentür", "Quiz Reformation", "★★★"], ["Renaissance-Werkstatt", "Hefteintrag", "★☆☆"], ["Hexenturm", "Buch S. 15/16", "☆☆☆"]];
+const T = {
+  neon: { tab: "Neon", rank: "LVL 3", title: "Knappe", streak: "Streak 4", goal: "Ziel // Gaming-PC", shop: "Shop", pc: "PC-Topf", nh: "Test // nächste Woche", nt: "Rote Missionen kommen dran. Überall 3 Sterne holen.", worlds: "Missionen", test: "TEST", boss: ["Boss-Level", "20 Fragen · 5 Leben"], choose: "Das will ich" },
+  street: { tab: "Street", rank: "Level 3", title: "Knappe", streak: "4 Tage Streak", goal: "Ziel: Gaming-PC", shop: "Shop", pc: "PC-Topf", nh: "Heads up: Test nächste Woche", nt: "Die Spots mit TEST-Sticker kommen dran. Überall 3 Sterne.", worlds: "Spots", test: "TEST", boss: ["Final Line", "20 Fragen · 5 Leben"], choose: "Das will ich" },
+  stadion: { tab: "Stadion", rank: "", title: "Knappe", streak: "Siegesserie 4", goal: "Ziel: Gaming-PC", shop: "Shop", pc: "PC-Topf", nh: "Nächste Woche: Test", nt: "Die Spieltage mit TEST zählen. Überall 3 Sterne holen.", worlds: "Spieltage", test: "TEST", boss: ["Das Finale", "20 Fragen · 5 Leben"], choose: "Das will ich", card: true },
+  battle: { tab: "Battle Royale", rank: "Tier 3", title: "Knappe", streak: "Win-Streak 4", goal: "Season-Ziel: Gaming-PC", shop: "Shop", pc: "PC-Topf", nh: "Test nächste Woche", nt: "Die Drop-Zones mit TEST kommen dran. Überall 3 Sterne.", worlds: "Drop-Zones", test: "TEST", boss: ["Final Circle", "20 Fragen · 5 Leben"], choose: "Das will ich", rar: ["Gewöhnlich", "Ungewöhnlich", "Selten", "Episch", "Legendär"] },
+  pirat: { tab: "Piraten-Anime", rank: "", title: "Knappe", streak: "4 Tage auf See", goal: "Der Schatz: Gaming-PC", shop: "Shop", pc: "Schatztruhe", nh: "Befehl vom Kapitän", nt: "Test nächste Woche! Die Inseln mit TEST kommen dran.", worlds: "Inseln", test: "TEST", boss: ["Der Endkampf", "20 Fragen · 5 Leben"], choose: "Das will ich", poster: true },
+};
+const keys = Object.keys(T);
+const tabs = document.getElementById("tabs");
+tabs.innerHTML = keys.map(k => `<button data-k="${k}">${T[k].tab}</button>`).join("");
+function render(k) {
+  const L = T[k];
+  tabs.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.k === k));
+  document.getElementById("screen").className = "screen t-" + k;
+  const ava = L.card ? `<div class="ava">78<small>LRN</small></div>` : `<div class="ava">C</div>`;
+  const rank = L.poster ? `<span class="bounty">Kopfgeld: 30.000</span>` : L.card ? `<span>Rating 78 · ${L.title}</span>` : `<span><span class="acc">${L.rank}</span> · ${L.title}</span>`;
+  document.getElementById("inner").innerHTML = `
+    <div class="hud">${ava}
+      <div class="who"><div class="name">Clemens</div>${rank}
+        <div class="xp"><i></i></div>
+        <div class="stats"><span class="dia">14</span><span>${L.streak}</span></div></div></div>
+    <button class="goal"><span class="glabel">${L.goal}</span><span class="gbar"><i></i></span><span class="gsub">162 € von 900 € im Topf</span></button>
+    <div class="btns"><button class="b p">${L.shop}</button><button class="b">${L.pc}</button></div>
+    <div class="notice"><b>${L.nh}</b><span>${L.nt}</span></div>
+    <h2>${L.worlds}</h2>
+    <div class="grid">
+      ${WORLDS.map((w, i) => `<button class="card c${i}"><div class="art" data-n="${L.card ? "Spieltag " + (i + 1) : ""}"><span class="st">${w[2]}</span></div>
+        <div class="body">${L.rar ? `<span class="rar">${L.rar[i]}</span>` : ""}<span class="tag">${L.test}</span><span class="cn">${w[0]}</span><span class="cs">${w[1]}</span></div></button>`).join("")}
+      <button class="card wide boss"><div class="art" data-n=""></div><div class="body">${L.rar ? `<span class="rar">${L.rar[4]}</span>` : ""}<span class="cn">${L.boss[0]}</span><span class="cs">${L.boss[1]}</span></div></button>
+    </div>
+    <button class="choose" id="choose">${L.choose}</button>
+    <p class="note">Nur eine Vorschau – die echte Lernwelt bleibt, bis du dich entschieden hast.</p>`;
+  document.getElementById("choose").onclick = () => alert("Sag Papa: „" + L.tab + "“ – dann wird's gebaut.");
+  try { localStorage.setItem("design-vorschau", k); } catch (e) {}
+}
+tabs.onclick = e => { const b = e.target.closest("button"); if (b) { render(b.dataset.k); scrollTo(0, 0); } };
+let start = "neon"; try { start = localStorage.getItem("design-vorschau") || start; } catch (e) {}
+render(keys.includes(start) ? start : "neon");
+</script>
+</body>
+</html>
